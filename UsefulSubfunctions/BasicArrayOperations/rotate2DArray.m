@@ -25,7 +25,7 @@ function [outputArray]=rotate2DArray(inputArray,rotAngle)
     end
     
     %generate zero-centred coordinate system
-    [rowRange,colRange]=meshgrid(((1:size(inputArray,1))-floor(size(inputArray,1)/2)),((1:size(inputArray,2))-floor(size(inputArray,2)/2)));
+    [rowRange,colRange]=meshgrid(((1:size(inputArray,2))-floor(size(inputArray,2)/2)),((1:size(inputArray,1))-floor(size(inputArray,1)/2)));
     
     %generate rotated coordinates
     rotRowRange=rowRange.*cos(rotAngle)+colRange.*sin(rotAngle);
