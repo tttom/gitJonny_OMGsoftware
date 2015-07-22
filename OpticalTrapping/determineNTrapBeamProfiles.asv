@@ -45,7 +45,7 @@ function []=determineNTrapBeamProfiles(dataMatrix,imageFolder,baseFileName,fileT
         zStepSize=0.8; %um
     end
     if nargin<7
-        sizeROI=100; %half-length of ROI box
+        sizeROI=50; %half-length of ROI box
     end
     if nargin<8
         noTraps=1;
@@ -112,10 +112,6 @@ function []=determineNTrapBeamProfiles(dataMatrix,imageFolder,baseFileName,fileT
         
         [xWidth,yWidth,zWidth]=determineTrapBeamProfile(croppedData,'','','',magnification,zStepSize);
 
-        disp(strcat('Widths of Beam (',num2str(trapIdx),'):'))
-        disp(strcat('x width = ',num2str(xWidth)))
-        disp(strcat('y width = ',num2str(yWidth)))
-        disp(strcat('z width = ',num2str(zWidth)))
 
 
 

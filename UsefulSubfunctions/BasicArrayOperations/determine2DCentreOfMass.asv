@@ -39,9 +39,8 @@ function [xCentre,yCentre]=determine2DCentreOfMass(inputArray,xRange,yRange,meth
         xCentre=sum(inputArray(:).*X(:))/sum(inputArray(:));
         yCentre=sum(inputArray(:).*Y(:))/sum(inputArray(:));
     elseif strcmp(method,'max')
-        %determine maximum pixel value
         [~,maxPos]=max(inputArray(:));
-        [yCentre,xCentre]=ind2sub(size(inputArray),maxPos);
+        
     end
 
 end

@@ -130,7 +130,8 @@ function [xWidth,yWidth,zWidth]=determineTrapBeamProfile(dataMatrix,imageFolder,
     xlabel('y [um]');ylabel('z [um]');
     title('y-z cross-section');
         
-    %Gaussian fitting code to determine widths of peaks
+    %add Gaussian fitting code to determine widths of peaks
+    %output x-, y-, and z-axis widths
 %     gauss1Options=fitoptions('gauss1','Lower',[0 -Inf 0]); %Y=a1*exp(-((x-b1)/c1)^2)
 %     gaussParams_X=fit(xRange.',squeeze(workingArray(floor(length(yRange)/2),:,floor(length(zRange)/2))).','gauss1',gauss1Options);
 %     gaussParams_Y=fit(yRange.',squeeze(workingArray(:,floor(length(xRange)/2),floor(length(zRange)/2))),'gauss1',gauss1Options);
@@ -145,7 +146,14 @@ function [xWidth,yWidth,zWidth]=determineTrapBeamProfile(dataMatrix,imageFolder,
     gaussFit_X=gaussParams_X.a1.*exp(-((xRange-gaussParams_X.b1)/gaussParams_X.c1).^2)+gaussParams_X.a2.*exp(-((xRange-gaussParams_X.b2)/gaussParams_X.c2).^2);
     gaussFit_Y=gaussParams_Y.a1.*exp(-((yRange-gaussParams_Y.b1)/gaussParams_Y.c1).^2)+gaussParams_Y.a2.*exp(-((yRange-gaussParams_Y.b2)/gaussParams_Y.c2).^2);
     gaussFit_Z=gaussParams_Z.a1.*exp(-((zRange-gaussParams_Z.b1)/gaussParams_Z.c1).^2)+gaussParams_Z.a2.*exp(-((zRange-gaussParams_Z.b2)/gaussParams_Z.c2).^2);
-        
+    
+    %determine beam widths
+    %(smaller cx parameter is peak, larger cx parameter is width of
+    %background)
+    xWidth=2*min(gaussParams_X.c1,gaussParams_X.c2);
+    yWidth=2*min(gaussParams_Y.c1,gaussParams_Y.c2);
+    zWidth=2*min(gaussParams_Z.c1,gaussParams_Z.c2);
+    
     %plot line profiles through centre
     figure()
     subplot(1,3,1);
@@ -163,12 +171,5 @@ function [xWidth,yWidth,zWidth]=determineTrapBeamProfile(dataMatrix,imageFolder,
     xlabel('z [um]');ylabel('Intensity [a.u.]');
     title('z-axis line profile');
     xlim([-10 10]);
-    
-    %determine beam widths
-    %(smaller cx parameter is peak, larger cx parameter is width of
-    %background)
-    xWidth=2*min(gaussParams_X.c1,gaussParams_X.c2);
-    yWidth=2*min(gaussParams_Y.c1,gaussParams_Y.c2);
-    zWidth=2*min(gaussParams_Z.c1,gaussParams_Z.c2);
     
 end
