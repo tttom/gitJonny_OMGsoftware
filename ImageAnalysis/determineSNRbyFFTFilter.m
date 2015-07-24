@@ -21,38 +21,32 @@ function determineSNRbyFFTFilter(inputImage,normaliseImage,pixelSize,numericalAp
     % default image
     if nargin<1
 %         inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\FluoCells_SFG_pos1_z203_170759.tiff');
-        inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\FluoCells_V5_pos1_z197_140101.tiff');
+%         inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\FluoCells_V5_pos1_z197_140101.tiff');
 %         inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\Hela_SFG_pos2_z290_154955.tiff');
-%         inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\Hela_V5_pos2_z289_163455.tiff');
+        inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\Hela_V5_pos2_z289_163455.tiff');
 
     end
-    % default normalisation
+    % default values
     if nargin<2
         normaliseImage=1;
     end
-    % default pixelSize
     if nargin<3
         pixelSize=0.5e-6; %m
     end
-    % default numericalAperture
     if nargin<4
         numericalAperture=1;
     end
-    %default lambda (wavelength)
     if nargin<5
-        lambda=400e-9; %m
+        lambda=800e-9; %m (illumiation wavelength)
     end
-    %default low cut-off freq.
     if nargin<6
-        lowCutOff=0.0001;
+        lowCutOff=0.004; %rising edge of signal bandpass filter
     end
-    %default high cut-off freq.
     if nargin<7
-        highCutOff=0.2;
+        highCutOff=0.45; %falling edge of signal bandpass filter
     end
-    %default sharpness of filters
     if nargin<8
-        filterStrength=4;
+        filterStrength=4; %steepness of filter edge
     end
     
     inputImage=single(inputImage);
@@ -62,17 +56,13 @@ function determineSNRbyFFTFilter(inputImage,normaliseImage,pixelSize,numericalAp
     end
     
     %generate real-space coordinate system
-    yRange=([1:size(inputImage,1)]-floor(size(inputImage,1)/2))*pixelSize;
-    xRange=([1:size(inputImage,2)]-floor(size(inputImage,2)/2))*pixelSize;
+    yRange=([1:size(inputImage,1)]-floor(size(inputImage,1)/2)-1)*pixelSize;
+    xRange=([1:size(inputImage,2)]-floor(size(inputImage,2)/2)-1)*pixelSize;
     
     %perform Fourier transform and generate fourier-space coordinates
     fftImage=fftshift(fft2(inputImage));
-    k_xRange=([1:size(inputImage,2)]-floor(size(inputImage,2)/2));
-    k_xRange=k_xRange/max(k_xRange(:));
-    k_xRange=k_xRange/pixelSize;
-    k_yRange=([1:size(inputImage,1)]-floor(size(inputImage,1)/2));
-    k_yRange=k_yRange/max(k_yRange(:));
-    k_yRange=k_yRange/pixelSize;
+    k_xRange=([1:size(inputImage,2)]-floor(size(inputImage,2)/2)-1)/(size(inputImage,2)*pixelSize/2);
+    k_yRange=([1:size(inputImage,1)]-floor(size(inputImage,1)/2)-1)/(size(inputImage,2)*pixelSize/2);
     %normalise to NA and lambda
     k_xRange=k_xRange*lambda/2/numericalAperture;
     k_yRange=k_yRange*lambda/2/numericalAperture;
@@ -107,8 +97,8 @@ function determineSNRbyFFTFilter(inputImage,normaliseImage,pixelSize,numericalAp
     disp(strcat('Signal-to-Noise Ratio = (',num2str(signalMag/(lowFreqNoiseMag+highFreqNoiseMag)),')'));
     
     %plot results
+    figure(1);
     %plot input image
-        figure();
         subplot(3,4,9);
         imagesc(xRange*1e6,yRange*1e6,inputImage);axis image;
         xlabel('x [um]');ylabel('y [um]');
@@ -134,15 +124,15 @@ function determineSNRbyFFTFilter(inputImage,normaliseImage,pixelSize,numericalAp
         subplot(3,4,6);
         imagesc(k_xRange,k_yRange,log10(abs(fftSignal)));axis image;
         xlabel('k_x [m^-^1*lambda/2/NA]');ylabel('k_y [m^-^1*lambda/2/NA]');
-        title('|fft(Signal)|');
+        title('log_1_0(|fft(Signal)|)');
         subplot(3,4,7);
         imagesc(k_xRange,k_yRange,log10(abs(fftLowFreqNoise)));axis image;
         xlabel('k_x [m^-^1*lambda/2/NA]');ylabel('k_y [m^-^1*lambda/2/NA]');
-        title('|fft(Low-Freq Noise)|');
+        title('log_1_0(|fft(Low-Freq Noise)|)');
         subplot(3,4,8);
         imagesc(k_xRange,k_yRange,log10(abs(fftHighFreqNoise)));axis image;
         xlabel('k_x [m^-^1*lambda/2/NA]');ylabel('k_y [m^-^1*lambda/2/NA]');
-        title('|fft(High-Freq Noise)|');
+        title('log_1_0(|fft(High-Freq Noise)|)');
     %plot filtered real space results
         subplot(3,4,10);
         imagesc(xRange*1e6,yRange*1e6,Signal);axis image;
@@ -156,6 +146,17 @@ function determineSNRbyFFTFilter(inputImage,normaliseImage,pixelSize,numericalAp
         imagesc(xRange*1e6,yRange*1e6,HighFreqNoise);axis image;
         xlabel('x [um]');ylabel('y [um]');
         title('High Freq Noise');
+        
+
+    figure(2);
+    subplot(2,1,1);
+    imagesc(xRange*1e6,yRange*1e6,inputImage);axis image;
+    xlabel('x [um]');ylabel('y [um]');
+    title('Input Image');
+    subplot(2,1,2);
+    imagesc(xRange*1e6,yRange*1e6,Signal);axis image;
+    xlabel('x [um]');ylabel('y [um]');
+    title('Filtered Image');
         
         
 end
