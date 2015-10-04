@@ -32,7 +32,7 @@ function quickStitchTwoMoviesMirrored(inputFolder1,inputFolder2,outputFolder)
         outputImage(:,size1(2)+1:end)=inputImage2;
         
 %         imagesc(outputImage);axis image;colormap gray;drawnow;shg;
-        imwrite(outputImage,fullOutputFileName);
+        imwrite(outputImage,fullOutputFileName,'Compression','None');
         
     end
 end
