@@ -21,8 +21,8 @@ function quickStitchTwoMoviesMirrored(inputFolder1,inputFolder2,outputFolder)
         fullInputFileName2=strcat(inputFolder2,'\',baseInputFileName2,fileNum,fileExt);
         fullOutputFileName=strcat(outputFolder,'\',baseOutputFileName,fileNum,fileExt);
         
-        inputImage1=imread(fullInputFileName1);
-        inputImage2=fliplr(imread(fullInputFileName2));
+        inputImage1=fliplr(imread(fullInputFileName1));
+        inputImage2=imread(fullInputFileName2);
         
         size1=size(inputImage1);
         size2=size(inputImage2);
