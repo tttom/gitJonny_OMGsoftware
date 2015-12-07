@@ -175,9 +175,9 @@ function [xWidth,yWidth,zWidth]=determineTrapBeamProfile(dataMatrix,imageFolder,
 %     gaussFit_Y=gaussParams_Y.a1.*exp(-((yRange-gaussParams_Y.b1)/gaussParams_Y.c1).^2);
 %     gaussFit_Z=gaussParams_Z.a1.*exp(-((zRange-gaussParams_Z.b1)/gaussParams_Z.c1).^2);
     gauss2Options=fitoptions('gauss2','Lower',[0 -Inf 0 0 -Inf 0]); %Y=a1*exp(-((x-b1)/c1)^2)+a2*exp(-((x-b2)/c2)^2)
-    gaussParams_X=fit(xRange.',squeeze(workingArray(floor(length(yRange)/2)+1,:,floor(length(zRange)/2)+1)).','gauss2',gauss2Options);
-    gaussParams_Y=fit(yRange.',squeeze(workingArray(:,floor(length(xRange)/2)+1,floor(length(zRange)/2)+1)),'gauss2',gauss2Options);
-    gaussParams_Z=fit(zRange.',squeeze(workingArray(floor(length(yRange)/2)+1,floor(length(xRange)/2)+1,:)),'gauss2',gauss2Options);
+    gaussParams_X=fit(xRange.',squeeze(workingArray(floor(length(yRange)/2),:,floor(length(zRange)/2))).','gauss2',gauss2Options);
+    gaussParams_Y=fit(yRange.',squeeze(workingArray(:,floor(length(xRange)/2),floor(length(zRange)/2))),'gauss2',gauss2Options);
+    gaussParams_Z=fit(zRange.',squeeze(workingArray(floor(length(yRange)/2),floor(length(xRange)/2),:)),'gauss2',gauss2Options);
     gaussFit_X=gaussParams_X.a1.*exp(-((xRange-gaussParams_X.b1)/gaussParams_X.c1).^2)+gaussParams_X.a2.*exp(-((xRange-gaussParams_X.b2)/gaussParams_X.c2).^2);
     gaussFit_Y=gaussParams_Y.a1.*exp(-((yRange-gaussParams_Y.b1)/gaussParams_Y.c1).^2)+gaussParams_Y.a2.*exp(-((yRange-gaussParams_Y.b2)/gaussParams_Y.c2).^2);
     gaussFit_Z=gaussParams_Z.a1.*exp(-((zRange-gaussParams_Z.b1)/gaussParams_Z.c1).^2)+gaussParams_Z.a2.*exp(-((zRange-gaussParams_Z.b2)/gaussParams_Z.c2).^2);
@@ -187,19 +187,16 @@ function [xWidth,yWidth,zWidth]=determineTrapBeamProfile(dataMatrix,imageFolder,
     subplot(1,3,1);
     plot(xRange,workingArray(floor(length(yRange)/2)+1,:,floor(length(zRange)/2)+1),xRange,gaussFit_X);
     xlabel('x [um]');ylabel('Intensity [a.u.]');
-    axis square;
     title('x-axis line profile');
-    xlim([-2 2]);
+    xlim([-5 5]);
     subplot(1,3,2);
     plot(yRange,workingArray(:,floor(length(xRange)/2)+1,floor(length(zRange)/2)+1),yRange,gaussFit_Y);
     xlabel('y [um]');ylabel('Intensity [a.u.]');
     title('y-axis line profile');
-    axis square;
-    xlim([-2 2]);
+    xlim([-5 5]);
     subplot(1,3,3);
-    plot(zRange,squeeze(workingArray(floor(length(yRange)/2)+1,floor(length(xRange)/2)+1,:)),zRange,gaussFit_Z);
+    plot(zRange,squeeze(workingArray(floor(length(yRange)/2),floor(length(xRange)/2),:)),zRange,gaussFit_Z);
     xlabel('z [um]');ylabel('Intensity [a.u.]');
-    axis square;
     title('z-axis line profile');
     xlim([-10 10]);
     
