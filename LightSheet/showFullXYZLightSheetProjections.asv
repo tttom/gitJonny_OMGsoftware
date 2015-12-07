@@ -120,9 +120,9 @@ function showFullXYZLightSheetProjections(folderNames,crop,cropPixels_xy,cropPix
             zSampling=zStep/xStep;
             newZLength=floor(length(zRange)*zSampling);
             zRange_int=interp1([1:length(zRange)],zRange,[1:newZLength]/zSampling,'linear','extrap');
-            xzProj_int=interp2(zRange.',yRange,xzProj.',zRange_int.',yRange,'linear',0);
+            xzProj_int=interp2(zRange.',yRange,xzProj.',zRange_int.',yRange,'linear');
             xzProj_int=xzProj_int.';
-            zyProj_int=interp2(xRange.',zRange,zyProj.',xRange.',zRange_int,'linear',0);
+            zyProj_int=interp2(xRange.',zRange,zyProj.',xRange.',zRange_int,'linear');
             zyProj_int=zyProj_int.';
             
             %normalise data range ([0 1])
