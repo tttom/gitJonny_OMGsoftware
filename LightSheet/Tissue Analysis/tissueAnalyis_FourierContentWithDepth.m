@@ -15,14 +15,17 @@
 function tissueAnalyis_FourierContentWithDepth(fileNames) 
     
     %variables:
-    normalisation_FLAG=1; %normalise input data to [0 1] range if true
+    normalisation_FLAG=0; %normalise input data to [0 1] range if true
     lambda=532e-9;
     numericalAperture=0.42; %these can be pulled from the datafiles in future
     fftThreshold=0.05; % make function input
 
     if nargin<1
         % files order with surface first, then increasing depth
-        fileNames={'./TestData/Airy_01.tif','./TestData/Airy_02.tif','./TestData/Airy_03.tif'};
+        fileNames={'F:\Stored Files\2015-08-13_Javier\47TDE-53PBS\02_DetSide_surface\2015-08-13 12_13_10.668\recording0_lambda532nm_alpha7_beta100.mat'...
+            ,'F:\Stored Files\2015-08-13_Javier\47TDE-53PBS\02_DetSide_-100um\2015-08-13 12_22_55.902\recording0_lambda532nm_alpha7_beta100.mat'...
+            ,'F:\Stored Files\2015-08-13_Javier\47TDE-53PBS\02_DetSide_-200um\2015-08-13 12_36_58.950\recording0_lambda532nm_alpha7_beta100.mat'...
+            };
     end
     
     % ensure input fileNames is in cell format
@@ -33,21 +36,31 @@ function tissueAnalyis_FourierContentWithDepth(fileNames)
     end
     
     % allocate memory for results
-    projections=zeros([2000,2048,length(fileNames)],'single');
     xStepSize=zeros([1,length(fileNames)],'single');
     zStepSize=zeros([1,length(fileNames)],'single');
+    dataMax=zeros([1,length(fileNames)],'single');
     
     % load test data
     for n=1:length(fileNames)
-        importedImage=single(imread(fileNames{n}));
-        xRange(:,n)=[1:size(importedImage,2)]*0.08*1e-6;
-        zRange(:,n)=[1:size(importedImage,1)]*0.08*1e-6;
-        projections(:,:,n)=importedImage;
-        clear importedImage;
+%         load(fileNames{n},'recordedImageStack','xRange','yRange','zRange');
+%         projections(:,:,n)=squeeze(max(recordedImageStack,[],1))';
+%         dataMax(n)=max(recordedImageStack(:));
+%         clear recordedImageStack;
+        load(fileNames{n},'restoredDataCube','xRange','yRange','zRange');
+        projections(:,:,n)=squeeze(max(restoredDataCube,[],1))';
+        dataMax(n)=max(restoredDataCube(:));
+        clear restoredDataCube;
+        clear xRange;
+        xRange_temp(:,n)=yRange;
+        clear yRange;
+        zRange_temp(:,n)=zRange;
+        clear zRange;
         if normalisation_FLAG==1
             projections(:,:,n)=projections(:,:,n)/max(max(projections(:,:,n)));
         end
     end
+    xRange=xRange_temp;
+    zRange=zRange_temp;
     
     % allocate more memory for results
     rotProjections=zeros(size(projections));
@@ -68,11 +81,12 @@ function tissueAnalyis_FourierContentWithDepth(fileNames)
         zRange(:,n)=([1:size(projections(:,:,n),1)]-floor(size(projections(:,:,n),1)/2))*zStepSize(n);
     end
     
-    % rotate projections and coordinates by 45deg clockwise so tissue surface is
+    % rotate projections and coordinates by 45deg anti-clockwise so tissue surface is
     % horizontal
     for n=1:length(fileNames)
         [rotProjections(:,:,n),rotZRange(:,n),rotXRange(:,n)]=rotate2DArray(projections(:,:,n),45/360*2*pi,zRange(:,n),xRange(:,n),0,0);
-        rotProjections(:,:,n)=rotProjections(:,:,n)/max(max(rotProjections(:,:,n)));
+        rotProjections(:,:,n)=rotProjections(:,:,n)/max(max(rotProjections(:,:,n)))*dataMax(n);
+        rotProjections(:,:,n)=rotProjections(:,:,n).*(rotProjections(:,:,n)>0);
     end
     
     % view top layer to select surface, then identify common features in
@@ -110,51 +124,67 @@ function tissueAnalyis_FourierContentWithDepth(fileNames)
     end
     close(1);
     
-    figure();
+    figure(2);
     for n=1:length(fileNames)
         % convert to absolute tissue depth coordinate
         absRotZRange(:,n)=rotZRange(:,n);
         for m=1:n
             absRotZRange(:,n)=absRotZRange(:,n)-relativeCoords(2,m)+relativeCoords(1,m);
         end
-        subplot(1,3,n);imagesc(rotXRange(:,n)*1e6,absRotZRange(:,n)*1e6,rotProjections(:,:,n));axis image;
+        subplot(1,length(fileNames),n);imagesc(rotXRange(:,n)*1e6,absRotZRange(:,n)*1e6,rotProjections(:,:,n));axis image;
         xlabel('x+z [um]');ylabel('Tissue depth (x-z) [um]');
     end
     
-    figure();
+    figure(3);
     % Fourier transform at different tissue depths
     for n=1:length(fileNames)
         % Fourier coordinate system
-%         k_rotXRange(:,n)=([1:length(rotXRange(:,n))]-floor(length(rotXRange(:,n))/2))/(length(rotXRange(:,n))*xStepSize(n)/2);
-        k_rotXRange(:,n)=[1:length(rotXRange(:,n))]/length(rotXRange(:,n))/xStepSize(n)*2;
-        k_rotXRange(:,n)=k_rotXRange(:,n)-k_rotXRange(1,n);
+        k_rotXRange(:,n)=([1:length(rotXRange(:,n))]-floor(length(rotXRange(:,n))/2)-1)/length(rotXRange(:,n))/xStepSize(n)*2;
+%         k_rotXRange(:,n)=[1:length(rotXRange(:,n))]/length(rotXRange(:,n))/xStepSize(n)*2;
+%         k_rotXRange(:,n)=k_rotXRange(:,n)-k_rotXRange(1,n);
         k_rotXRange(:,n)=k_rotXRange(:,n)*lambda/2/numericalAperture;
         
         % FFT projections
         for m=1:size(rotProjections(:,1,n))
-%             fftProjections(m,:,n)=fftshift(fft(squeeze(rotProjections(m,:,n))));
-            fftProjections(m,:,n)=fft(squeeze(rotProjections(m,:,n)));
+            fftProjections(m,:,n)=fftshift(fft(squeeze(rotProjections(m,:,n))));
+            fftProjections(m,:,n)=abs(fftProjections(m,:,n));
+            fftProjections(m,:,n)=fftProjections(m,:,n)/max(max(fftProjections(m,:,n)));
         end
-        fftProjections=abs(fftProjections);
-        fftProjections=fftProjections/max(fftProjections(:));
-        thresholdedFftProjections=fftProjections>fftThreshold;
-        subplot(2,3,n);imagesc(k_rotXRange(:,n),absRotZRange(:,n)*1e6,fftProjections(:,:,n));
+    end
+
+    thresholdedFftProjections=fftProjections>fftThreshold;
+    for n=1:length(fileNames)
+        subplot(2,length(fileNames),n);imagesc(k_rotXRange(:,n),absRotZRange(:,n)*1e6,fftProjections(:,:,n));
         xlabel('k_{x+z}');ylabel('Tissue depth (x-z) [um]');
-        xlim([0 1]);
-        subplot(2,3,3+n);imagesc(k_rotXRange(:,n),absRotZRange(:,n)*1e6,thresholdedFftProjections(:,:,n));
+        xlim([0 0.5]);
+        subplot(2,length(fileNames),length(fileNames)+n);imagesc(k_rotXRange(:,n),absRotZRange(:,n)*1e6,thresholdedFftProjections(:,:,n));
         xlabel('k_{x+z}');ylabel('Tissue depth (x-z) [um]');
-        xlim([0 1]);
+        xlim([0 0.5]);
     end
     
-    thresholdedFftProjections=thresholdedFftProjections(:,floor(end/2)+1:end,:);
-    [~,thresholdFftLinesIndex]=max(thresholdedFftProjections,[],2);
+    %total Fourier content versus depth
+    totalFourier=squeeze(sum(fftProjections,2));
+    figure(4);
+    plot(absRotZRange(:,1)*1e6,totalFourier(:,1)...
+        ,absRotZRange(:,2)*1e6,totalFourier(:,2)...
+        ,absRotZRange(:,3)*1e6,totalFourier(:,3)...                                                      
+        );
+    title('Power spectrum integral versus Tissue depth');
+    xlabel('Tissue depth [um]');
+    ylabel('Intensity [a.u]');
+    
+    thresholdedFftProjections2=thresholdedFftProjections(:,floor(end/2)+1:end,:);
+    [~,thresholdFftLinesIndex]=min(thresholdedFftProjections2,[],2);
     thresholdFftLinesIndex=squeeze(thresholdFftLinesIndex);
     for n=1:length(fileNames)
-        for m=1:size(thresholdedFftProjections,1)
-            thresholdFftLines(m,n)=k_rotXRange(floor(end/2)+thresholdFftLinesIndex(m,n));
+        for m=1:size(thresholdedFftProjections2,1)
+            thresholdFftLines(m,n)=k_rotXRange(floor(size(k_rotXRange,1)/2)+thresholdFftLinesIndex(m,n),n);
         end
     end
-    figure(4);plot(absRotZRange(:,1)*1e6,thresholdFftLines(:,1)...
+    figure(5);plot(absRotZRange(:,1)*1e6,thresholdFftLines(:,1)...
         ,absRotZRange(:,2)*1e6,thresholdFftLines(:,2)...
         ,absRotZRange(:,3)*1e6,thresholdFftLines(:,3));
+    title('Highest spatial frequency versus Tissue depth');
+    xlabel('Tissue depth [um]');
+    ylabel('k_x_+_z');
 end
