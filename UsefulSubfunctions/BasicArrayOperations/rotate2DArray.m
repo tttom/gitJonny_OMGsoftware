@@ -11,7 +11,7 @@
 %%%
 %%% END
 
-function [outputArray,outputColRange,outputRowRange]=rotate2DArray(inputArray,rotAngle,inputColRange,inputRowRange,displayRotation)
+function [outputArray,outputColRange,outputRowRange]=rotate2DArray(inputArray,rotAngle,inputColRange,inputRowRange,cubic_FLAG,displayRotation)
 
     % initialise default values
     if nargin<1
@@ -35,6 +35,11 @@ function [outputArray,outputColRange,outputRowRange]=rotate2DArray(inputArray,ro
     end
     
     if nargin<5
+        % default linear interpolation
+       cubic_FLAG=0; 
+    end
+    
+    if nargin<6
         % default display rotated image
        displayRotation=1; 
     end
@@ -70,7 +75,11 @@ function [outputArray,outputColRange,outputRowRange]=rotate2DArray(inputArray,ro
     rotColRange=rotColRange+rotColOffset;
     
     %perform sub-pixel interpolated rotation
-    outputArray=interp2(rowRange,colRange,inputArray,rotRowRange,rotColRange,'*linear*',0);
+    if cubic_FLAG==1
+        outputArray=interp2(rowRange,colRange,inputArray,rotRowRange,rotColRange,'*cubic*',0);
+    else
+        outputArray=interp2(rowRange,colRange,inputArray,rotRowRange,rotColRange,'*linear*',0);
+    end
     
     %output coords
     outputColRange=rotColRange(:,floor(size(rotColRange,2)/2));

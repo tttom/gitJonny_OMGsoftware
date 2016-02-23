@@ -15,9 +15,10 @@
 function tissueAnalyis_FourierContentWithDepth(fileNames) 
     
     %variables:
+    normalisation_FLAG=1; %normalise input data to [0 1] range if true
     lambda=532e-9;
     numericalAperture=0.42; %these can be pulled from the datafiles in future
-    fftThreshold=0.05 % make function input
+    fftThreshold=0.05; % make function input
 
     if nargin<1
         % files order with surface first, then increasing depth
@@ -43,6 +44,9 @@ function tissueAnalyis_FourierContentWithDepth(fileNames)
         zRange(:,n)=[1:size(importedImage,1)]*0.08*1e-6;
         projections(:,:,n)=importedImage;
         clear importedImage;
+        if normalisation_FLAG==1
+            projections(:,:,n)=projections(:,:,n)/max(max(projections(:,:,n)));
+        end
     end
     
     % allocate more memory for results
@@ -67,7 +71,8 @@ function tissueAnalyis_FourierContentWithDepth(fileNames)
     % rotate projections and coordinates by 45deg clockwise so tissue surface is
     % horizontal
     for n=1:length(fileNames)
-        [rotProjections(:,:,n),rotZRange(:,n),rotXRange(:,n)]=rotate2DArray(projections(:,:,n),45/360*2*pi,zRange(:,n),xRange(:,n),0);
+        [rotProjections(:,:,n),rotZRange(:,n),rotXRange(:,n)]=rotate2DArray(projections(:,:,n),45/360*2*pi,zRange(:,n),xRange(:,n),0,0);
+        rotProjections(:,:,n)=rotProjections(:,:,n)/max(max(rotProjections(:,:,n)));
     end
     
     % view top layer to select surface, then identify common features in
@@ -105,7 +110,7 @@ function tissueAnalyis_FourierContentWithDepth(fileNames)
     end
     close(1);
     
-    figure(2);
+    figure();
     for n=1:length(fileNames)
         % convert to absolute tissue depth coordinate
         absRotZRange(:,n)=rotZRange(:,n);
@@ -116,20 +121,27 @@ function tissueAnalyis_FourierContentWithDepth(fileNames)
         xlabel('x+z [um]');ylabel('Tissue depth (x-z) [um]');
     end
     
-    figure(3);
+    figure();
     % Fourier transform at different tissue depths
     for n=1:length(fileNames)
         % Fourier coordinate system
-        k_rotXRange(:,n)=([1:length(rotXRange(:,n))]-floor(length(rotXRange(:,n))/2))/(length(rotXRange(:,n))*xStepSize(n)/2);
+%         k_rotXRange(:,n)=([1:length(rotXRange(:,n))]-floor(length(rotXRange(:,n))/2))/(length(rotXRange(:,n))*xStepSize(n)/2);
+        k_rotXRange(:,n)=[1:length(rotXRange(:,n))]/length(rotXRange(:,n))/xStepSize(n)*2;
+        k_rotXRange(:,n)=k_rotXRange(:,n)-k_rotXRange(1,n);
         k_rotXRange(:,n)=k_rotXRange(:,n)*lambda/2/numericalAperture;
         
         % FFT projections
         for m=1:size(rotProjections(:,1,n))
-            fftProjections(m,:,n)=fftshift(fft(squeeze(rotProjections(m,:,n))));
-            fftProjections(m,:,n)=fftProjections(m,:,n)/max(fftProjections(m,:,n));
-            thresholdedFftProjections(m,:,n)=abs(fftProjections(m,:,n))>fftThreshold;
+%             fftProjections(m,:,n)=fftshift(fft(squeeze(rotProjections(m,:,n))));
+            fftProjections(m,:,n)=fft(squeeze(rotProjections(m,:,n)));
         end
-        subplot(1,3,n);imagesc(k_rotXRange(:,n),absRotZRange(:,n)*1e6,thresholdedFftProjections(:,:,n));
+        fftProjections=abs(fftProjections);
+        fftProjections=fftProjections/max(fftProjections(:));
+        thresholdedFftProjections=fftProjections>fftThreshold;
+        subplot(2,3,n);imagesc(k_rotXRange(:,n),absRotZRange(:,n)*1e6,fftProjections(:,:,n));
+        xlabel('k_{x+z}');ylabel('Tissue depth (x-z) [um]');
+        xlim([0 1]);
+        subplot(2,3,3+n);imagesc(k_rotXRange(:,n),absRotZRange(:,n)*1e6,thresholdedFftProjections(:,:,n));
         xlabel('k_{x+z}');ylabel('Tissue depth (x-z) [um]');
         xlim([0 1]);
     end
