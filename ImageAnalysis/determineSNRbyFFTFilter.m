@@ -23,7 +23,9 @@ function determineSNRbyFFTFilter(inputImage,normaliseImage,pixelSize,numericalAp
 %         inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\FluoCells_SFG_pos1_z203_170759.tiff');
 %         inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\FluoCells_V5_pos1_z197_140101.tiff');
 %         inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\Hela_SFG_pos2_z290_154955.tiff');
-        inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\Hela_V5_pos2_z289_163455.tiff');
+%         inputImage=imread('C:\Users\Jonathan Nylk\Downloads\NoiseImages_domar\Hela_V5_pos2_z289_163455.tiff');
+%         inputImage=imread('C:\Users\Jonathan Nylk\Downloads\FluoCells_pos1_64x64um_Verdi_113150.tiff');
+        inputImage=imread('C:\Users\Jonathan Nylk\Downloads\FluoCells_pos1_64x64um_SFG_125249.tiff');
 
     end
     % default values
@@ -31,7 +33,7 @@ function determineSNRbyFFTFilter(inputImage,normaliseImage,pixelSize,numericalAp
         normaliseImage=1;
     end
     if nargin<3
-        pixelSize=0.5e-6; %m
+        pixelSize=0.1e-6; %m
     end
     if nargin<4
         numericalAperture=1;
@@ -40,10 +42,10 @@ function determineSNRbyFFTFilter(inputImage,normaliseImage,pixelSize,numericalAp
         lambda=800e-9; %m (illumiation wavelength)
     end
     if nargin<6
-        lowCutOff=0.004; %rising edge of signal bandpass filter
+        lowCutOff=0.2; %rising edge of signal bandpass filter
     end
     if nargin<7
-        highCutOff=0.45; %falling edge of signal bandpass filter
+        highCutOff=1.25; %falling edge of signal bandpass filter
     end
     if nargin<8
         filterStrength=4; %steepness of filter edge
