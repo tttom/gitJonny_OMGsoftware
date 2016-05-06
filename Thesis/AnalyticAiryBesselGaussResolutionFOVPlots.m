@@ -4,7 +4,7 @@ lambda=0.532; %um
 n=1.33;
 %resolution and FOV (NA,alpha,beta)
 rG=@(NA) lambda/2./NA/0.88;
-FovG=@(NA) 4*lambda./(NA.^2);
+FovG=@(NA) 4*lambda*n./(NA.^2);
 rG=@(NA) lambda/2./NA/0.88;
 rB=@(NA,b) 0.05*pi*lambda./NA./b;
 FovB=@(NA,b) lambda/2/n./b./(1-sqrt(1-(NA/n).^2));
@@ -12,7 +12,7 @@ rA=@(NA,a) max(0.12.*a*lambda/2./NA,lambda/2./NA/0.88);
 FovA=@(NA,a) 6.*a*lambda/n./(1-sqrt(1-(NA/n).^2));
 
 %resolution as function of FOV[fov],alpha,beta)
-rG_FOV=@(fov) lambda/0.88/2.*sqrt(fov/4/lambda);
+rG_FOV=@(fov) lambda/0.88/2.*sqrt(fov/4/lambda/n);
 rB_FOV=@(fov,b) 0.05*pi*lambda./b/n./sqrt(1-(1-(lambda/2/n./b./fov)).^2);
 rA_FOV=@(fov,a) min(lambda.*a*0.12/n./sqrt(1-(1-(6.*a*lambda/n./fov)).^2),lambda/0.88/2.*sqrt(fov/4/lambda));
 
