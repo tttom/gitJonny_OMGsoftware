@@ -1,4 +1,4 @@
-%%% Analytical Gaussian, Bssel, and Airy Resolution/FOV Plots
+%%% Analytical Gaussian, Bessel, and Airy Resolution/FOV Plots
 
 lambda=0.532; %um
 n=1.33;

@@ -6,7 +6,7 @@
 %%%                     anti-clockwise.
 %%%
 %%% Updates (latest first):
-%%% 19/20/2015:         If a zero-centred coordinate system is given as an
+%%%     19/02/2015:     If a zero-centred coordinate system is given as an
 %%%                     input, this is rotated and output.
 %%%
 %%% END
