@@ -28,7 +28,7 @@
 %%% END
 
 
-function wavefrontAberrationMeasurement_CizmarMethod2010(Camera_Type,Camera_Settings,SLM_Type,SLM_Settings,Probe_Mode_Size)
+function wavefrontAberrationMeasurement_CizmarMethod2010(Camera_Type,Camera_Settings,SLM_Type,SLM_Settings,Probe_Mode_Size,Phase_Periods,Phase_Samples,Correction_HalfROI)
 
     if nargin < 1
         % Hamamatsu Orca Flash 4.0 v2
@@ -71,6 +71,24 @@ function wavefrontAberrationMeasurement_CizmarMethod2010(Camera_Type,Camera_Sett
         SLM_Settings.modulation.Range2Pi = 1; % Fraction of pixel bit range that equals 2pi
     end
     
+    if nargin < 5
+        % Must divide 100 with no remainder
+        Probe_Mode_Size = 50; % Pixels
+%         Probe_Mode_Size = 20; % Pixels
+    end
+    
+    if nargin < 6
+        Phase_Periods = 2;
+    end
+    
+    if nargin < 7
+        Phase_Samples = 16; % Samples per period
+    end
+    
+    if nargin < 8
+        Correction_HalfROI = 1; % Half-width of box to collect signal from (pixels)
+    end
+    
     Flag_Error = 0; % 0 if no (predicted) errors, 1 if (predicted) error.
     
     
@@ -87,7 +105,7 @@ function wavefrontAberrationMeasurement_CizmarMethod2010(Camera_Type,Camera_Sett
             imSize = vidObj.VideoResolution;
             imHeight = imSize(1);
             imWidth = imSize(2);
-%             start(vidObj);
+            start(vidObj);
             disp('WARNING: Camera object not started for debugging purposes.')
             pause(0.5);
             disp('Camera initialisation complete')
@@ -100,45 +118,60 @@ function wavefrontAberrationMeasurement_CizmarMethod2010(Camera_Type,Camera_Sett
     switch SLM_Type
         case 'Hamamatsu_LCOS'
             disp('Initialising SLM: Hamamatsu LCOS.')
-            SLMWindow=figure('Name','SLMWindow','Position',[SLM_Settings.location.horizontalStart SLM_Settings.location.verticalStart SLM_Settings.size.slmWidth SLM_Settings.size.slmHeight]);
-            SLMObj=image(ones(SLM_Settings.size.slmHeight,SLM_Settings.size.slmWidth,'uint8') .* (2.^SLM_Settings.pixelDepth - 1) .* SLM_Settings.modulation.Range2Pi);
-            SLMAxes=get(SLMObj,'Parent');
+            SLMWindow = figure('Name','SLMWindow','Position',[SLM_Settings.location.horizontalStart SLM_Settings.location.verticalStart SLM_Settings.size.slmWidth SLM_Settings.size.slmHeight]);
+            SLMObj = image(ones(SLM_Settings.size.slmHeight,SLM_Settings.size.slmWidth,'uint8') .* (2.^SLM_Settings.pixelDepth - 1) .* SLM_Settings.modulation.Range2Pi);
+            SLMAxes = get(SLMObj,'Parent');
             set(SLMAxes,'Position',[0 0 1 1]);
             colormap(gray(2.^SLM_Settings.pixelDepth));
             drawnow;shg;
             % Define SLM Coords
-            [xSLM,ySLM] = meshgrid(1:SLM_Settings.size.slmWidth - floor(SLM_Settings.size.slmWidth/2),1:SLM_Settings.size.slmHeight - floor(SLM_Settings.size.slmHeight/2));
+            [xSLM,ySLM] = meshgrid([1:SLM_Settings.size.slmWidth] - floor(SLM_Settings.size.slmWidth/2),[1:SLM_Settings.size.slmHeight] - floor(SLM_Settings.size.slmHeight/2));
             xSLM = single(xSLM);
             ySLM = single(ySLM);
             % Default Blazed Grating
             SLM_BlazedGrating = mod(angle(exp(2 * pi * 1i * SLM_Settings.modulation.horizontalGratingPeriod .* xSLM)...
                 .* exp(2 * pi * 1i * SLM_Settings.modulation.verticalGratingPeriod .* ySLM)) / 2 / pi,1)...
                  .* (2.^SLM_Settings.pixelDepth - 1) .* SLM_Settings.modulation.Range2Pi;
-            SLMObj = image(uint8(SLM_BlazedGrating));
+            SLMObj = image(SLM_BlazedGrating);
         otherwise
             disp('No recognised SLM type input. Exiting function.')
             Flag_Error = 1;
     end
   
+    if Flag_Error == 0
+        %%% Select pixel of interest
+        disp('Use previewFrame Window to select point of image to perfrom correction on.')
+%         previewFrame = zeros(imHeight,imWidth,Camera_Settings.pixelFormat); % Pre-allocation of memory not crucial here.
+        trigger(vidObj);
+        previewFrame = getdata(vidObj,1);
+        previewFig = figure();
+        imagesc(previewFrame);
+        axis image;
+        title('Click on point in image to perform correction on to continue');
+        drawnow;shg;
+        [camXCoord,camYCoord] = ginput(1);
+        close(previewFig);
+        camXCoord = round(camXCoord); % Closest pixel
+        camYCoord = round(camYCoord); % Closest pixel
+        
+        %%% Set probe parameters
+        noVerticalModes = SLM_Settings.size.slmHeight / Probe_Mode_Size;
+        noHorizontalModes = SLM_Settings.size.slmWidth / Probe_Mode_Size;
+        % Check integer number of modes in each dimension
+        if mod(noVerticalModes,1) ~= 0 || mod(noHorizontalModes,1) ~= 0
+            Probe_Mode_Size = 50;
+            noVerticalModes = SLM_Settings.size.slmHeight / Probe_Mode_Size;
+            noHorizontalModes = SLM_Settings.size.slmWidth / Probe_Mode_Size;
+            disp('Probe_Mode_Size does not fit in integer tiling onto SLM, setting default Probe_Mode_Size.');
+        end
+        
+        
+    else
+        disp('Error encountered during initialisation. Wavefront measurement not made.')
+    end
     
     
-    
-    
-    
-    
-    
-    
-    
-
-
-
-
-
-
-
-
-
-
+    keyboard
 
 
     %%% De-initialise camera
@@ -146,6 +179,14 @@ function wavefrontAberrationMeasurement_CizmarMethod2010(Camera_Type,Camera_Sett
         case 'Hamamatsu_Orca_Flash4.0_v2_C11440'
             delete(vidObj);
             clear vidObj srcObj;
+        otherwise
+    end
+    
+    %%% De-initialise SLM
+    switch SLM_Type
+        case 'Hamamatsu_LCOS'
+            close SLMWindow;
+            clear SLMWindow SLMAxes SLMObj;
         otherwise
     end
 
