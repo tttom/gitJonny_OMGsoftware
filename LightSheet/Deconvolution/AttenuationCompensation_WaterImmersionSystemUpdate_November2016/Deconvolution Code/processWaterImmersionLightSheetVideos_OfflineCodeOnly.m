@@ -16,7 +16,8 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
 %         folderNames={'E:\2015-12-08_JavierTello_BeadInjectedMouseBrain_Cleared'};
 %         folderNames={'G:\Stored Files\M2_DeconvolutionExampleFiles_CONFIDENTIAL\Simulation_Examples\__Acquired Data'};
 %         folderNames = {'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2016-12-07_CalibrationMeasurements'};
-        folderNames = {'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2016-12-09_pixelreassignment\Airystep200_scan100_int25'};
+%         folderNames = {'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2016-12-09_pixelreassignment\Airystep200_scan100_int25'};
+        folderNames = {'H:\NEW_SYSTEM_RESULTS\2016-12-14_compAiry\absorbance55cm-1\2016-12-14 15_12_36.642\TestFolder'};
 
     end
     if (nargin<2) 
@@ -52,6 +53,13 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
     if (ischar(folderNames))
         folderNames={folderNames};
     end
+    
+    
+    % if running on data acquisition machine (LAB-PC), never delete raw data files
+    if strcmp(getenv('COMPUTERNAME'),'LAB-PC')
+        deleteAvi = false;
+    end
+    
     
     %Load the default configuration from the .json file
     functionName=mfilename();

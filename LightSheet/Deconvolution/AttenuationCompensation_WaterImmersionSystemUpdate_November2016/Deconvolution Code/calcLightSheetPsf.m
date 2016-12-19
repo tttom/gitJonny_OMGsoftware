@@ -63,6 +63,28 @@ function psf=calcLightSheetPsf(xRange,yRange,zRange,tilt,excitation,modulation,r
         beamAngle=excitation.beamAngle;
     end
     
+    % Check for attenuation compensation parameters and modify pupil
+    % function if needed
+    if isfield(modulation,'sigmaU')
+        sigmaU = modulation.sigmaU;
+        sigmaV = modulation.sigmaV;
+    else
+        sigmaU = 0;
+        sigmaV = 0;
+    end
+    
+    % Check for super-Gaussian window parameters and modify pupil
+    % function if needed
+    if isfield(modulation,'A_SG')
+        A_SG = modulation.A_SG;
+        k_SG = modulation.k_SG;
+        sigma_SG = modulation.sigma_SG;
+    else
+        A_SG = 0;
+        k_SG = 0;
+        sigma_SG = 0;
+    end
+    
     %Define cubic phase mask for Airy beam PSF
     if ~isa(modulation,'function_handle')
         if ~isempty(beamAngle)
@@ -72,7 +94,7 @@ function psf=calcLightSheetPsf(xRange,yRange,zRange,tilt,excitation,modulation,r
             clear UR;
         end
         modulation=@(U,V) (sqrt(U.^2+V.^2)>=(1-modulation.beta)).*exp(2i*pi*modulation.alpha*(U.^3+V.^3));
-    end
+    end    
     
     projectionDimension=1;
     if (length(xRange)<=1)
@@ -92,10 +114,24 @@ function psf=calcLightSheetPsf(xRange,yRange,zRange,tilt,excitation,modulation,r
     %Rotate the coordinate system so that X and Z are interchanged.
     pupilFunctor=@(U,V) crop(U,V).*apodization(U,V).*exp(2i*pi*tilt*V).*modulation(U,V);
     
+    % Check for attenuation compensation parameters and modify pupil
+    % function if needed
+    if sigmaU ~= 0 && sigmaV ~= 0
+        pupilFunctor = @(U,V) pupilFunctor(U,V)...
+            .* exp((sigmaU - 1) .* U) .* exp((sigmaV - 1) .* V);
+    end
+    
+    % Check for super-Gaussian window parameters and modify pupil
+    % function if needed
+    if A_SG ~= 0 && k_SG ~= 0 && sigma_SG ~=0
+        pupilFunctor = @(U,V) pupilFunctor(U,V)...
+            .* A_SG .* exp(-1 .* (k_SG .* (U + V)).^sigma_SG);
+    end
+    
     %Assume circular polarization propagating along the x-axis and
     %call the function calcVectorialPsf to calculate the PSF
     cache=Cache(); % Get the default cache
-    key={xRangeForProj,zRange,yRange,{excitation.wavelength,1/sqrt(2),1i/sqrt(2),illuminationClippingFactors,gaussianIlluminationStd,beamAngle,modulation,tilt},numericalAperture,refractiveIndexOfSample,excitation.objective.magnification,excitation.objective.tubeLength,projectionDimension};
+    key={xRangeForProj,zRange,yRange,{excitation.wavelength,1/sqrt(2),1i/sqrt(2),illuminationClippingFactors,gaussianIlluminationStd,beamAngle,pupilFunctor,tilt},numericalAperture,refractiveIndexOfSample,excitation.objective.magnification,excitation.objective.tubeLength,projectionDimension};
     if isfield(cache,key)
         logMessage('Loading PSF projection from cache...');
         %If available, loads a previously-calculated PSF with identical parameters and
