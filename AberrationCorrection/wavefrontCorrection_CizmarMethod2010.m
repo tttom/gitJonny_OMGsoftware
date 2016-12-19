@@ -44,7 +44,10 @@
 %%% END
 
 
-function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod2010(Camera_Type,Camera_Settings,SLM_Type,SLM_Settings,Probe_Mode_Size,Phase_Periods,Phase_Samples,Correction_HalfROI,Delay_Timer)
+function [SLM_Amplitude_Map,SLM_Amplitude_Map_Bounded,SLM_Phase_Map,SLM_Phase_Map_Bounded,intensity_Matrix...
+    ,cosine_Fitting_Parameters,cosine_Fitting_Parameters_Bounded,cosine_Fitting_Matrix,cosine_Fitting_Matrix_Bounded]...
+    = wavefrontCorrection_CizmarMethod2010(Camera_Type,Camera_Settings,SLM_Type,SLM_Settings...
+    ,Probe_Mode_Size,Phase_Periods,Phase_Samples,Correction_HalfROI,Delay_Timer)
 
     if nargin < 1
         % Hamamatsu Orca Flash 4.0 v2
@@ -65,7 +68,7 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
        Camera_Settings.Triggering.framesPerTrigger = 1; % Frames per trigger
        Camera_Settings.Triggering.triggerRepeat = Inf; % Trigger repeat
        % Exposure
-       Camera_Settings.exposureTime = 0.02; %Exposure time (in seconds - I think)
+       Camera_Settings.exposureTime = 0.05; %Exposure time (in seconds - I think)
     end
     
     if nargin < 3
@@ -90,31 +93,36 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
     
     if nargin < 5
         % Must divide 100 with no remainder
-        Probe_Mode_Size = [50,50]; % [vert,horiz] Pixels
-%         Probe_Mode_Size = [20,20]; % [vert,horiz] Pixels
+        %Probe_Mode_Size = [100,100]; % [vert,horiz] Pixels
+         Probe_Mode_Size = [25,25]; % [vert,horiz] Pixels
     end
     
     if nargin < 6
         Phase_Periods = 2;
+%         Phase_Periods = 1;
     end
     
     if nargin < 7
-        Phase_Samples = 8; % Samples per period
+        Phase_Samples = 16; % Samples per period
+%         Phase_Samples = 8; % Samples per period
     end
     
     if nargin < 8
-        Correction_HalfROI = 1; % Half-width of box to collect signal from (pixels)
+        Correction_HalfROI = 0; % Half-width of box to collect signal from (pixels)
     end
     
     if nargin < 9
 %         Delay_Timer = 60; % seconds (time to wait before starting)
-        Delay_Timer = 0; % seconds
+        Delay_Timer = 30; % seconds
     end
     
     Flag_Error = 0; % 0 if no (predicted) errors, 1 if (predicted) error.
     Flag_No_Camera = 0; % 0 if camera set, 1 if no camera set.
     
     live_Cam = 1;
+    
+    SLM_Pause = 1/15;
+%     SLM_Pause = 0;
     
     %%% Initialise camera
     switch Camera_Type
@@ -161,6 +169,8 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
                  .* (2.^SLM_Settings.pixelDepth - 1) .* SLM_Settings.modulation.Range2Pi;
             SLMObj = image(SLM_BlazedGrating);
             drawnow;shg;
+            SLM_High_Frequency_Grating = (mod(xSLM,2) .* mod(ySLM,2) + mod(xSLM + 1,2) .* mod(ySLM + 1,2))...
+                .* (2.^SLM_Settings.pixelDepth - 1) .* SLM_Settings.modulation.Range2Pi;
         otherwise
             disp('No recognised SLM type input. Exiting function.')
             Flag_Error = 1;
@@ -188,13 +198,20 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
         ,Probe_Mode_Size(2) * (ref_Mode_Horizontal - 1) + 1:Probe_Mode_Size(2) * ref_Mode_Horizontal)...
         = 1;
     ref_Mask = ref_Amplitude_Mask .* SLM_BlazedGrating;
+    calibration_Probe_Amplitude_Mask = zeros(SLM_Settings.size.slmHeight,SLM_Settings.size.slmWidth,'single');
+    calibration_Probe_Amplitude_Mask(Probe_Mode_Size(1) * (ref_Mode_Vertical - 2) + 1:Probe_Mode_Size(1) * (ref_Mode_Vertical - 1)...
+        ,Probe_Mode_Size(2) * (ref_Mode_Horizontal - 2) + 1:Probe_Mode_Size(2) * (ref_Mode_Horizontal - 1))...
+        = 1;
+    calibration_Probe_Mask = calibration_Probe_Amplitude_Mask .* SLM_BlazedGrating;
     % Set fitting parameters
     intensity_Matrix = zeros(noVerticalModes,noHorizontalModes,Phase_Periods * Phase_Samples,'single');
     cosine_Fitting_Matrix = zeros(noVerticalModes,noHorizontalModes,Phase_Periods * Phase_Samples,'single');
+    cosine_Fitting_Matrix_Bounded = zeros(noVerticalModes,noHorizontalModes,Phase_Periods * Phase_Samples,'single');
     cosine_Function = @(cosine_Params,t) cosine_Params(1) .* cos(cosine_Params(2) .* t + cosine_Params(3)) + cosine_Params(4);
     cosine_Params0 = [0,0,0,0];
     cosine_Parameter_Minimisation_Function = @(data,cosine_Params,t) sum((squeeze(data) - squeeze(cosine_Function(cosine_Params,t)).').^2);
-    cosine_Fitting_Parameters = zeros(noVerticalModes,noHorizontalModes,4,'single'); %y = A * cos(B * x + C) + D (4 parameters to fit).
+    cosine_Fitting_Parameters = zeros(noVerticalModes,noHorizontalModes,4,'single'); % y = A * cos(B * x + C) + D (4 parameters to fit).
+    cosine_Fitting_Parameters_Bounded = zeros(noVerticalModes,noHorizontalModes,4,'single'); % y = A * cos(B * x + C) + D (4 parameters to fit).
   
     if Flag_Error == 0
         %%% Preview
@@ -233,9 +250,9 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
         if Flag_No_Camera == 0
             figure(SLMWindow);
             axes(SLMAxes);
-            SLMObj = image(ref_Mask);
+            SLMObj = image(ref_Mask + calibration_Probe_Mask + SLM_High_Frequency_Grating .* (1 - ref_Amplitude_Mask - calibration_Probe_Amplitude_Mask));
             drawnow;shg;
-            pause(1/60); % Short delay to allow SLM to update
+            pause(SLM_Pause); % Short delay to allow SLM to update
             stop(vidObj);
             preview(vidObj);
             disp('Set laser power then continue.')
@@ -276,9 +293,9 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
                         full_Probe_Mask = ref_Mask + probe_Mask;
                         figure(SLMWindow);
                         axes(SLMAxes);
-                        SLMObj = image(full_Probe_Mask);
+                        SLMObj = image(full_Probe_Mask  + SLM_High_Frequency_Grating .* (1 - ref_Amplitude_Mask - probe_Amplitude_Mask));
                         drawnow;shg;
-                        pause(1/60); % Short delay to allow SLM to update
+                        pause(SLM_Pause); % Short delay to allow SLM to update
                         % Acquire frame
                         if Flag_No_Camera == 0
                             trigger(vidObj);
@@ -304,6 +321,9 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
             end
         end
         measurement_Time = toc(measurement_Timer);
+        if live_Cam == 1 && Flag_No_Camera == 0
+            close 40;
+        end
         disp(strcat('Wavefront correction measurement complete. Data acquisition took (',num2str(measurement_Time),') seconds.'))
         
         SLMObj = image(ones(SLM_Settings.size.slmHeight,SLM_Settings.size.slmWidth,'uint8')...
@@ -329,9 +349,25 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
                     cosine_Params0(2) = (2.^SLM_Settings.pixelDepth - 1) / SLM_Settings.modulation.Range2Pi;
                     cosine_Params0(3) = max_idx / Phase_Samples * 2 * pi;
                     cosine_Params0(4) = max_val - cosine_Params0(1);
-                    cosine_Fitting_Parameters(V_idx,H_idx,:) = fminsearch(@(cosine_Params) cosine_Parameter_Minimisation_Function(intensity_Matrix(V_idx,H_idx,:),cosine_Params,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples),cosine_Params0);
+                    % Unbounded optimisation (fminsearch)
+                    [cosine_Fitting_Parameters(V_idx,H_idx,:),~,cosine_Fitting_Exit_Flag]...
+                        = fminsearch(@(cosine_Params) cosine_Parameter_Minimisation_Function(intensity_Matrix(V_idx,H_idx,:),cosine_Params,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples)...
+                        ,cosine_Params0); % Initial parameters guess
+                    if cosine_Fitting_Exit_Flag == 1
+                        cosine_Fitting_Parameters(V_idx,H_idx,:) = cosine_Params0;
+                    end
+                    % Bounded optimisation (fminsearchbnd)
+                    [cosine_Fitting_Parameters_Bounded(V_idx,H_idx,:),~,cosine_Fitting_Exit_Flag]...
+                        = fminsearchbnd(@(cosine_Params) cosine_Parameter_Minimisation_Function(intensity_Matrix(V_idx,H_idx,:),cosine_Params,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples)...
+                        ,cosine_Params0... % Initial parameters guess
+                        ,[0,(2.^SLM_Settings.pixelDepth - 1) / SLM_Settings.modulation.Range2Pi * 0.9,0,0]... % Lower limits
+                        ,[max_val,(2.^SLM_Settings.pixelDepth - 1) / SLM_Settings.modulation.Range2Pi * 1.1,2 * pi,max_val]); % Upper limits
+                    if cosine_Fitting_Exit_Flag == 1
+                        cosine_Fitting_Parameters_Bounded(V_idx,H_idx,:) = cosine_Params0;
+                    end
                 end
                 cosine_Fitting_Matrix(V_idx,H_idx,:) = cosine_Function(cosine_Fitting_Parameters(V_idx,H_idx,:),[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples);
+                cosine_Fitting_Matrix_Bounded(V_idx,H_idx,:) = cosine_Function(cosine_Fitting_Parameters_Bounded(V_idx,H_idx,:),[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples);
                 
                 Flag_Plot_Results = 0;
                 if Flag_Plot_Results
@@ -351,6 +387,8 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
         %%% Process results
         SLM_Amplitude_Map = zeros(SLM_Settings.size.slmHeight,SLM_Settings.size.slmWidth,'single');
         SLM_Phase_Map = zeros(SLM_Settings.size.slmHeight,SLM_Settings.size.slmWidth,'single');
+        SLM_Amplitude_Map_Bounded = zeros(SLM_Settings.size.slmHeight,SLM_Settings.size.slmWidth,'single');
+        SLM_Phase_Map_Bounded = zeros(SLM_Settings.size.slmHeight,SLM_Settings.size.slmWidth,'single');
         % Loop over all vertical mode coords
         for V_idx = 1:noVerticalModes
             % Loop over all horizontal mode coords
@@ -361,9 +399,17 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
                     SLM_Phase_Map(Probe_Mode_Size(1) * (V_idx - 1) + 1:Probe_Mode_Size(1) * V_idx...
                         ,Probe_Mode_Size(2) * (H_idx - 1) + 1:Probe_Mode_Size(2) * H_idx)...
                         = cosine_Fitting_Parameters(V_idx,H_idx,3);
+                    SLM_Amplitude_Map_Bounded(Probe_Mode_Size(1) * (V_idx - 1) + 1:Probe_Mode_Size(1) * V_idx...
+                        ,Probe_Mode_Size(2) * (H_idx - 1) + 1:Probe_Mode_Size(2) * H_idx)...
+                        = cosine_Fitting_Parameters_Bounded(V_idx,H_idx,1);
+                    SLM_Phase_Map_Bounded(Probe_Mode_Size(1) * (V_idx - 1) + 1:Probe_Mode_Size(1) * V_idx...
+                        ,Probe_Mode_Size(2) * (H_idx - 1) + 1:Probe_Mode_Size(2) * H_idx)...
+                        = cosine_Fitting_Parameters_Bounded(V_idx,H_idx,3);
             end
         end
         SLM_Phase_Map = mod(SLM_Phase_Map / 2 / pi,1)...
+            .* (2.^SLM_Settings.pixelDepth - 1) .* SLM_Settings.modulation.Range2Pi;
+        SLM_Phase_Map_Bounded = mod(SLM_Phase_Map_Bounded / 2 / pi,1)...
             .* (2.^SLM_Settings.pixelDepth - 1) .* SLM_Settings.modulation.Range2Pi;
         figure(51);
         imagesc(SLM_Amplitude_Map);
@@ -374,8 +420,55 @@ function [SLM_Amplitude_Map,SLM_Phase_Map] = wavefrontCorrection_CizmarMethod201
         axis image;
         title('phase map');
         disp(strcat('2 Pi dynamic range at correction wavelength = (',num2str(round(mean(mean(cosine_Fitting_Parameters(:,:,2))))),').'))
+        figure(53);
+        imagesc(SLM_Amplitude_Map_Bounded);
+        axis image;
+        title('amplitude map (bounded)');
+        figure(54);
+        imagesc(SLM_Phase_Map_Bounded);
+        axis image;
+        title('phase map (bounded');
+        disp(strcat('2 Pi dynamic range at correction wavelength = (',num2str(round(mean(mean(cosine_Fitting_Parameters(:,:,2))))),') (bounded optimisation).'))
         
         %%% 
+        figure(55);
+        for plotV_idx = 1:5
+            for plotH_idx = 1:5
+                if plotV_idx < 5 && plotH_idx < 5
+                    subplot(5,5,(plotV_idx-1) * 5 + plotH_idx);
+                    plot([1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(intensity_Matrix(round(size(intensity_Matrix,1) * (plotV_idx-1) / 4) + 1,round(size(intensity_Matrix,1) * (plotH_idx-1) / 4) + 1,:))...
+                        ,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(cosine_Fitting_Matrix(round(size(intensity_Matrix,1) * (plotV_idx-1) / 4) + 1,round(size(intensity_Matrix,1) * (plotH_idx-1) / 4) + 1,:))...
+                        ,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(cosine_Fitting_Matrix_Bounded(round(size(intensity_Matrix,1) * (plotV_idx-1) / 4) + 1,round(size(intensity_Matrix,1) * (plotH_idx-1) / 4) + 1,:)));
+                elseif plotV_idx < 5 && plotH_idx == 5
+                    subplot(5,5,(plotV_idx-1) * 5 + plotH_idx);
+                    plot([1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(intensity_Matrix(round(size(intensity_Matrix,1) * (plotV_idx-1) / 4) + 1,end,:))...
+                        ,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(cosine_Fitting_Matrix(round(size(intensity_Matrix,1) * (plotV_idx-1) / 4) + 1,end,:))...
+                        ,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(cosine_Fitting_Matrix_Bounded(round(size(intensity_Matrix,1) * (plotV_idx-1) / 4) + 1,end,:)));
+                elseif plotV_idx == 5 && plotH_idx < 5
+                    subplot(5,5,(plotV_idx-1) * 5 + plotH_idx);
+                    plot([1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(intensity_Matrix(end,round(size(intensity_Matrix,1) * (plotV_idx-1) / 4) + 1,:))...
+                        ,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(cosine_Fitting_Matrix(end,round(size(intensity_Matrix,1) * (plotV_idx-1) / 4) + 1,:))...
+                        ,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(cosine_Fitting_Matrix_Bounded(end,round(size(intensity_Matrix,1) * (plotV_idx-1) / 4) + 1,:)));
+                else
+                    subplot(5,5,(plotV_idx-1) * 5 + plotH_idx);
+                    plot([1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(intensity_Matrix(end,end,:))...
+                        ,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(cosine_Fitting_Matrix(end,end,:))...
+                        ,[1:Phase_Samples * Phase_Periods] * 2 * pi / Phase_Samples...
+                        ,squeeze(cosine_Fitting_Matrix_Bounded(end,end,:)));
+                end
+            end
+        end
         
     else
         disp('Error encountered during initialisation. Wavefront measurement not made.')
