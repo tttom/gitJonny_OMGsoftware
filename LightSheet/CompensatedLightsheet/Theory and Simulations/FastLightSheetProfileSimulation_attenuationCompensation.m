@@ -13,6 +13,11 @@
 %%%
 %%% END %%%
 
+%%%
+%%% NEED TO CHECK THE CODE THOROUGHLY AS I HAVE PLAYING WITH IT FOR
+%%% PARTICULAR SIMULATIONS.
+%%%
+
 
 function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,lambda,NA,alpha,compensation_type...
     ,sigma_exp,sigma_lin,sigma_peak,x_peak,C_abs,outputFolder,Flag_imageSimulation,deconvolution_lightSheet,amp_peak)
@@ -20,19 +25,22 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
     %default inputs
     if nargin < 1
 %         zRange = [-50:0.05:50] * 1e-6;  % transverse beam axis [metres]
-        zRange = [-50:0.5:50] * 1e-6;  % transverse beam axis [metres]
+        zRange = [-50:0.1:10] * 1e-6;  % transverse beam axis [metres]
     end
     if nargin < 2
-        xRange = [-100:1:100] * 1e-6; % propagation axis [metres]
+%         xRange = [-100:1:100] * 1e-6; % propagation axis [metres]
+        xRange = [-10:1:310] * 1e-6;
     end
     if nargin < 3
         lambda = 532e-9;    % [metres]
     end
     if nargin < 4
-        NA = 0.42;
+%         NA = 0.42;
+        NA = 0.4;
     end
     if nargin < 5
         alpha = 7;
+%         alpha = 0;
     end
     if nargin < 6
         compensation_type = 'Exponential';
@@ -40,8 +48,8 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
 %         compensation_type = 'Peak';
     end
     if nargin < 7
-        sigma_exp = 0.54;
-%         sigma_exp = 0;
+%         sigma_exp = 0.54;
+        sigma_exp = 0;
     end
     if nargin < 8
         sigma_lin = 0.54;
@@ -58,7 +66,7 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
         C_abs = 0;   % [metres^-1]
     end
     if nargin < 12
-        outputFolder = 'C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\2016-10-06';
+        outputFolder = 'C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\2016-12-08';
     end
     if nargin < 13
 %         Flag_imageSimulation = 1;   % performs image convolution and deconvolution
@@ -100,8 +108,8 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
     end
     
     % cylindrical simulation so no y-axis needed
-%     yRange = [0] * 1e-6;    % transverse beam axis (in plane of light-sheet) [metres]
-    yRange = zRange;
+    yRange = [0] * 1e-6;    % transverse beam axis (in plane of light-sheet) [metres]
+%     yRange = zRange;
 
     % soft-aperture implemented, therefore extend hard aperture limit of NA
     NA_pupil = NA / 0.7;
@@ -114,17 +122,19 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
 
     % set pupil limits
         VPupilSize = 1;       % z-axis
-%         UPupilSize = 0.01;    % y-axis
-        UPupilSize = 1;     % y-axis
+        UPupilSize = 0.01;    % y-axis
+%         UPupilSize = 1;     % y-axis
 
     % set hard-aperture at pupil limit
     pupilAmplitudeMaskU = @(U,V) 1 * (U >= -UPupilSize & U <= UPupilSize);
     pupilAmplitudeMaskV = @(U,V) 1 * (V >= -VPupilSize & V <= VPupilSize);
 
     % set super-Gaussian apodization
-    sigma_superGaussian = 8;    %super-Gaussian order (must be even!)
+%     sigma_superGaussian = 8;    %super-Gaussian order (must be even!)
+    sigma_superGaussian = 100;    % TO REMOVE EFFECT OF SUPER-GUASSIAN APODIZATION
     superGaussian = @(U,V) exp(-(sqrt(2) * U).^ sigma_superGaussian) .* exp(-(sqrt(2) * V).^ sigma_superGaussian);
-
+%     superGaussian = @(U,V) exp(-(sqrt(2) * sqrt(U.^2 + V.^2)).^ sigma_superGaussian); % CIRCULAR PUPIL
+    
     pupilPhaseModulations = cell([1,2]);
     
     % compensated beam definition
