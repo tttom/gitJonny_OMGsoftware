@@ -1,0 +1,5 @@
+# Ignore the following file types #
+###################################
+*.mat
+*.fig
+*.png
