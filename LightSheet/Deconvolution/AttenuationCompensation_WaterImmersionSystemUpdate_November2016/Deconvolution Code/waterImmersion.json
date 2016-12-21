@@ -10,6 +10,7 @@
 		"power": 1e-05
 	},
 	"detection": {
+		"calibratedSystemMagnification": 36.74,
 		"wavelength": 6e-07,
 		"objective": {
 			"refractiveIndex": 1.33,

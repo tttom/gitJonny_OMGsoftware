@@ -1,4 +1,4 @@
-function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,reprocessData,deleteAvi,centerOffset,scanShear,perspectiveScaling)
+function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,reprocessData,deleteAvi,centerOffset,scanShear,perspectiveScaling,showFigures)
 % Reads the recorded data, converts it to matrices and deconvolves.
 %
 % Input:
@@ -17,8 +17,9 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
 %         folderNames={'G:\Stored Files\M2_DeconvolutionExampleFiles_CONFIDENTIAL\Simulation_Examples\__Acquired Data'};
 %         folderNames = {'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2016-12-07_CalibrationMeasurements'};
 %         folderNames = {'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2016-12-09_pixelreassignment\Airystep200_scan100_int25'};
-        folderNames = {'H:\NEW_SYSTEM_RESULTS\2016-12-14_compAiry\absorbance55cm-1\2016-12-14 15_12_36.642\TestFolder'};
-
+%         folderNames = {'H:\NEW_SYSTEM_RESULTS\2016-12-14_compAiry\absorbance55cm-1\2016-12-14 15_12_36.642\TestFolder'};
+        folderNames = {'H:\NEW_SYSTEM_RESULTS\2016-12-20_CalibrationMeasurements\BeadData_NA0.42_DetIris03mm\2016-12-20 16_59_36.625'};
+        
     end
     if (nargin<2) 
         reprocessData=true;
@@ -49,7 +50,13 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
         scanShear=[0 0];
 %         scanShear=[-0.0594,-0.0044];
     end
+    
+    if (nargin<6)
+        showFigures = 0; % display figures that show intermediate/final outputs during processing
+    end
  
+    
+    
     if (ischar(folderNames))
         folderNames={folderNames};
     end
@@ -150,6 +157,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
                     logMessage('Loading %s...',inputFileName);
                     try
                         recordedImageStack=readDataCubeFromAviFile(inputFileName);
+                        recordedImageStack = flip(recordedImageStack,2);
                     catch Exc
                         logMessage('Failed to load data stack from %s!',inputFileName);
                         recordedImageStack=[];
@@ -170,7 +178,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
                     % Call the function deconvolveRecordedDataStack to
                     % perform the deconvolution
                     logMessage('Starting image reconstruction...');
-                    [recordedImageStack lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRange,zRange tRange lightSheetPsf]=deconvolveRecordedImageStack(recordedImageStack,setupConfig);
+                    [recordedImageStack lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRange,zRange tRange lightSheetPsf]=deconvolveRecordedImageStack(recordedImageStack,setupConfig,showFigures);
                     restoredDataCube=recordedImageStack; clear recordedImageStack; % This operation does not take extra memory in Matlab
 
                     % Append the rest of the results
@@ -201,7 +209,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
         for listIdx=1:length(directoryList),
             if directoryList(listIdx).isdir && directoryList(listIdx).name(1)~='.'
                 expandedFolderName=strcat(folderName,'/',directoryList(listIdx).name);
-                processWaterImmersionLightSheetVideos_OfflineCodeOnly(expandedFolderName,reprocessData,deleteAvi);
+                processWaterImmersionLightSheetVideos_OfflineCodeOnly(expandedFolderName,reprocessData,deleteAvi,centerOffset,scanShear,perspectiveScaling,showFigures);
             end
         end
         

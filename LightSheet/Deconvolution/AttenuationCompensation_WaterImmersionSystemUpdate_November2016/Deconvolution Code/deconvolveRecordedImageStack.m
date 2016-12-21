@@ -1,4 +1,4 @@
-function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRange,zRange tRange lightSheetPsf]=deconvolveRecordedImageStack(recordedImageStack,config)
+function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRange,zRange tRange lightSheetPsf]=deconvolveRecordedImageStack(recordedImageStack,config,showFigures)
 % recordedImageStack format: The recorded values [x y z]=[down right back] on camera, or [swipe propagation scan]
 % config: a light sheet microscope set-up configuration file (.json), including the wavelengths and the pupil functions.
 
@@ -11,7 +11,12 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
         config.detector.center=[0 0];
     end
     
-    realMagnification=config.detection.objective.magnification*config.detection.tubeLength/config.detection.objective.tubeLength;
+    if isfield(config.detection,'calibratedSystemMagnification')
+        realMagnification = config.detection.calibratedSystemMagnification; % use known magnification of system if available
+    else
+        realMagnification=config.detection.objective.magnification*config.detection.tubeLength/config.detection.objective.tubeLength; % calculate theoretical perfect magnification if system magnification not known
+    end
+    
     xRange=-config.detector.center(1)+config.detector.pixelSize(1)*([1:size(recordedImageStack,1)]-floor(size(recordedImageStack,1)/2)-1)/realMagnification; % up/down on camera
     yRange=-config.detector.center(2)+config.detector.pixelSize(2)*([1:size(recordedImageStack,2)]-floor(size(recordedImageStack,2)/2)-1)/realMagnification; % left/right on camera
     tRange=stageTranslationStepSize*([1:size(recordedImageStack,3)]-floor(size(recordedImageStack,3)/2+1)); %Translation range (along z-axis)
@@ -48,6 +53,7 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
         scaling=[0.1270 0.1176]*1e-5;
     end
     
+    if showFigures
         % Display XY, XZ, and YZ projections of the recorded data cube
         % (before geometric correction).
         % and the (static) light sheet PSF.
@@ -63,7 +69,7 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
         subplot(2,1,2);imagesc(yRange*1e6,zRange*1e6,squeeze(max(recordedImageStack,[],1)).');axis image;title('xz-proj');
         xlabel('x-axis [um]');ylabel('z-axis [um]');
         colormap gray
-        
+    end
     
     lightSheetPsfOrig=lightSheetPsf;
     if (~all(scanShear==0) || ~all(scaling==0))
@@ -84,6 +90,7 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
         end
     end
  
+    if showFigures
         % Display XY, XZ, and YZ projections of the recorded data cube
         % (after geometric correction).
         % and the (static) light sheet PSF.
@@ -99,6 +106,7 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
         subplot(2,1,2);imagesc(yRange*1e6,zRange*1e6,squeeze(max(recordedImageStack,[],1)).');axis image;title('xz-proj');
         xlabel('x-axis [um]');ylabel('z-axis [um]');
         colormap gray
+    end
     
     %Call subfunction deconvolveLightSheet to perform deconvolution of the
     %image and the Airy illumination PSF.
@@ -124,6 +132,7 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
         lightSheetPsf=lightSheetPsfOrig;
     end  
     
+    if showFigures
         % Display XY, XZ, and YZ projections of the deconvolved data cube.
         % and the (static) light sheet PSF.
         figure();
@@ -138,7 +147,8 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
         subplot(2,1,2);imagesc(yRange*1e6,zRange*1e6,squeeze(max(restoredDataCube,[],1)).');axis image;title('xz-proj');
         xlabel('x-axis [um]');ylabel('y-axis [um]');
         colormap gray
-            
+    end
+    
 end
 
 function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf tRange]=deconvolveLightSheet(xRange,yRange,zRange,tRange,recordedImageStack,config,lightSheetPsf)
