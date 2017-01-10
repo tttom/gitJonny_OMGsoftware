@@ -1,4 +1,61 @@
-function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,reprocessData,deleteAvi,centerOffset,scanShear,perspectiveScaling,showFigures)
+%%% Function:           processWaterImmersionLightSheetVideos_OfflineCodeOnly.m
+%%% Author:             Jonathan Nylk (University of St Andrews)
+%%% Created:            10/01/2017
+%%% Description:        This functiopn is a heavily modified version of
+%%%                     "processWaterImmersionLightSheetVideos.m"
+%%%                     originally developed by Tom Vettenburg for
+%%%                     deconvolution of Airy light-sheet microscopy image
+%%%                     stacks. This function, and corresponding
+%%%                     subfunctions, have been modified specifically to
+%%%                     handle image stacks acquired with
+%%%                     attenuation-compensated Airy light-sheets.
+%%%
+%%% Inputs:         folderNames:
+%%%                     Cell containing an array of folders in string
+%%%                     format to check within for files to be deconvolved.
+%%%                     Has infinite regression capability.
+%%%                 reprocessData:
+%%%                     When false, date which already has a mat file with
+%%%                     a restoredDataCube matrix in it will be skipped.
+%%%                 deleteAvi:
+%%%                     If true, the raw data files are DELETED and
+%%%                     replaced by a smaller .avi file of the same name
+%%%                     plus the suffix _PROCESSED.  Set to FALSE unless
+%%%                     there is a copy of the raw data stored elsewhere.
+%%%                 centerOffset:
+%%%                     The offset of the light sheet beam waist in metres
+%%%                     given as a 2-element vector containing the vertical
+%%%                     (swipe direction, y) and the horizontal
+%%%                     (beam propagation direction, x) offset
+%%%                     respectively.
+%%%                     y-axis offset has no impact on code.
+%%%                 scanShear:
+%%%                     The fractional change in x and y (vertical and
+%%%                     horizontal) when moving in z (axially).
+%%%                 perspectiveScaling:
+%%%                     The linear change in x and y (vertical and
+%%%                     horizontal) magnification when increasing z by one
+%%%                     metre [m^-1].
+%%%                 showFigures:
+%%%                     If TRUE display figures that show
+%%%                     intermediate/final outputs during processing.
+%%%                 sampleAttenuation:
+%%%                     Estimated attenuation coefficient of the sample
+%%%                     [m^-1].
+%%%
+%%% Outputs:            No function outputs.
+%%%                     The processed data is saved in a .mat file with the
+%%%                     same name as the original data file, in the same
+%%%                     folder location as the original data file.
+%%%                     
+%%%
+%%% Updates (latest first):
+%%%         10/01/2017: 
+%%%
+%%% END
+
+
+function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,reprocessData,deleteAvi,centerOffset,scanShear,perspectiveScaling,showFigures,sampleAttenuation)
 % Reads the recorded data, converts it to matrices and deconvolves.
 %
 % Input:
@@ -54,6 +111,10 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
     if (nargin<6)
         showFigures = 0; % display figures that show intermediate/final outputs during processing
     end
+    
+    if nargin < 7
+        sampleAttenuation = 0 * 100; % [m^-1]
+    end
  
     
     
@@ -97,6 +158,9 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
         end
         if (~isempty(perspectiveScaling))
             experimentConfig.detector.perspectiveScaling=perspectiveScaling;
+        end
+        if (~isempty(sampleAttenuation))
+            experimentConfig.sample.sampleAttenuation = sampleAttenuation;
         end
         savejson([],experimentConfig,experimentConfigFileName);
         experimentConfig=structUnion(defaultConfig,experimentConfig);
@@ -178,7 +242,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
                     % Call the function deconvolveRecordedDataStack to
                     % perform the deconvolution
                     logMessage('Starting image reconstruction...');
-                    [recordedImageStack lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRange,zRange tRange lightSheetPsf]=deconvolveRecordedImageStack(recordedImageStack,setupConfig,showFigures);
+                    [recordedImageStack lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRange,zRange tRange lightSheetPsf]=deconvolveRecordedImageStack(recordedImageStack,setupConfig,showFigures,sampleAttenuation);
                     restoredDataCube=recordedImageStack; clear recordedImageStack; % This operation does not take extra memory in Matlab
 
                     % Append the rest of the results
@@ -209,7 +273,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
         for listIdx=1:length(directoryList),
             if directoryList(listIdx).isdir && directoryList(listIdx).name(1)~='.'
                 expandedFolderName=strcat(folderName,'/',directoryList(listIdx).name);
-                processWaterImmersionLightSheetVideos_OfflineCodeOnly(expandedFolderName,reprocessData,deleteAvi,centerOffset,scanShear,perspectiveScaling,showFigures);
+                processWaterImmersionLightSheetVideos_OfflineCodeOnly(expandedFolderName,reprocessData,deleteAvi,centerOffset,scanShear,perspectiveScaling,showFigures,sampleAttenuation);
             end
         end
         

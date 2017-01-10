@@ -1,4 +1,4 @@
-function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRange,zRange tRange lightSheetPsf]=deconvolveRecordedImageStack(recordedImageStack,config,showFigures)
+function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRange,zRange tRange lightSheetPsf]=deconvolveRecordedImageStack(recordedImageStack,config,showFigures,sampleAttenuation)
 % recordedImageStack format: The recorded values [x y z]=[down right back] on camera, or [swipe propagation scan]
 % config: a light sheet microscope set-up configuration file (.json), including the wavelengths and the pupil functions.
 
@@ -29,15 +29,25 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
     %Call function calcLightSheetPsf
     lightSheetPsf=calcLightSheetPsf(single(xRange),single(yRange*((-1).^inversePropagation)),single(zRange),tilt,config.excitation,config.modulation,config.sample.refractiveIndex);
     
-    
-    
     % Modify lightSheetPsf to account for depth-of-focus of detection lens.
-    sigma=25e-6; %width of Gaussian
+    sigma=16e-6; %width of Gaussian
     GaussEnvelope=zeros(size(lightSheetPsf));
     for n=1:length(yRange)
         GaussEnvelope(1,n,:)=exp(-(zRange.^2)/2/(sigma)^2);
     end
     lightSheetPsf=lightSheetPsf.*GaussEnvelope;
+    
+    % normalise
+    lightSheetPsf = lightSheetPsf ./ max(lightSheetPsf(:));
+    
+    % Implement attenuation of the light-sheet
+    % simulate "perfect" absorption
+    absorption_decay = repmat(exp(-sampleAttenuation * yRange),[length(zRange) 1]);
+    lightSheetPsf = lightSheetPsf .* absorption_decay;
+    % re-normalise
+    lightSheetPsf = lightSheetPsf ./ max(lightSheetPsf(:));
+    
+    
     
     %Import scan shear and perspective scaling parameters from the config
     %file or manually enter the results of the
@@ -191,6 +201,17 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf tRange]=dec
     lightSheetOtf=fftshift(fft(ifftshift(lightSheetDeconvPsf(1,:,:),3),[],3),3);
     clear lightSheetDeconvPsf;
     lightSheetOtf=lightSheetOtf./max(abs(lightSheetOtf(:))); % Maintain the mean brightness
+    
+    % Scale OTF for attenuation compensation parameters
+    % Check for attenuation compensation parameters
+        if isfield(config.modulation,'sigmaV')
+            sigmaV = config.modulation.sigmaV;
+        else
+            sigmaV = 0;
+        end
+    compensationScalingParameter = 10.478 * (sigmaV.^2) + (1.8838 * sigmaV) + 1;
+    lightSheetOtf = lightSheetOtf * compensationScalingParameter;
+    
     
     %Construct the deconvolution filter
     lightSheetDeconvFilter=conj(lightSheetOtf)./(abs(lightSheetOtf).^2+repmat(permute(excitationNoiseToSignalRatio.^2,[1 3 2]),[size(lightSheetOtf,1) size(lightSheetOtf,2) 1]));
