@@ -8,7 +8,7 @@ function [dataStruct]=determineScanShearPerspectiveScalingParameters(recordedIma
     %workspace.
     if nargin<1
 %         fileName='C:\Users\Jonathan Nylk\Desktop\DeconvolutionMasterclass_MSquared_02-12-2015\Example Beads\ex3\recording0_lambda532nm_alpha-7_beta100.mat';
-        fileName='E:\2015-05-29_BeadTest\Aperture_09\2015-05-29 12_45_09.800\recording0_lambda532nm_alpha7_beta100.mat';
+        fileName='F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\testsample\2017-01-25 10_57_35.581\recording0_lambda532nm_alpha7_beta100.mat';
         load(fileName,'recordedImageStack','xRange','yRange','zRange');
     end
     

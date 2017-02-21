@@ -31,8 +31,11 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
     
     % Modify lightSheetPsf to account for depth-of-focus of detection lens.
     sigma=16e-6; %width of Gaussian
+%     focalPlaneTilt = 0 / 100; %microns of tilt per 100 microns along y axis
+%     focalPlaneExpansion = 0 / 100; %microns of expansion per 100 microns along y axis
     GaussEnvelope=zeros(size(lightSheetPsf));
     for n=1:length(yRange)
+%         GaussEnvelope(1,n,:)=interp1(zRange,exp(-(zRange.^2)/2/(sigma + yRange(n) * focalPlaneExpansion)^2),zRange + focalPlaneTilt * yRange(n),'linear',0);
         GaussEnvelope(1,n,:)=exp(-(zRange.^2)/2/(sigma)^2);
     end
     lightSheetPsf=lightSheetPsf.*GaussEnvelope;
@@ -41,8 +44,10 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
     lightSheetPsf = lightSheetPsf ./ max(lightSheetPsf(:));
     
     % Implement attenuation of the light-sheet
-    % simulate "perfect" absorption
-    absorption_decay = repmat(exp(-sampleAttenuation * yRange),[length(zRange) 1]);
+    absorption_decay = zeros(size(lightSheetPsf));
+    for n=1:length(zRange)
+        absorption_decay(1,:,n)=exp(-sampleAttenuation * yRange); % simulate "perfect" absorption
+    end
     lightSheetPsf = lightSheetPsf .* absorption_decay;
     % re-normalise
     lightSheetPsf = lightSheetPsf ./ max(lightSheetPsf(:));
@@ -205,17 +210,21 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf tRange]=dec
     % Scale OTF for attenuation compensation parameters
     % Check for attenuation compensation parameters
         if isfield(config.modulation,'sigmaV')
-            sigmaV = config.modulation.sigmaV;
+            sigmaV = abs(config.modulation.sigmaV);
         else
             sigmaV = 0;
         end
     compensationScalingParameter = 10.478 * (sigmaV.^2) + (1.8838 * sigmaV) + 1;
     lightSheetOtf = lightSheetOtf * compensationScalingParameter;
     
+%     lightSheetEnvelope = zeros([size(lightSheetPsf,1) size(lightSheetPsf,2) 2]);
+%     lightSheetEnvelope(:,:,1) = max(lightSheetPsf,[],3);
+%     lightSheetEnvelope = lightSheetEnvelope / max(lightSheetEnvelope(:));
     
     %Construct the deconvolution filter
     lightSheetDeconvFilter=conj(lightSheetOtf)./(abs(lightSheetOtf).^2+repmat(permute(excitationNoiseToSignalRatio.^2,[1 3 2]),[size(lightSheetOtf,1) size(lightSheetOtf,2) 1]));
-    
+%     lightSheetDeconvFilter=conj(lightSheetOtf)./(abs(lightSheetOtf).^2 + (repmat(permute(excitationNoiseToSignalRatio,[1 3 2]),[size(lightSheetOtf,1) size(lightSheetOtf,2) 1]) ./ repmat(lightSheetEnvelope(:,:,1),[size(lightSheetOtf,1) 1 size(lightSheetOtf,3)])).^2);
+
     %Extend edges to double the size and convolve by multiplying the
     %deconvolution filter with the fft of each slice of the image stack,
     %then ifft the product.

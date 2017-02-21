@@ -116,16 +116,18 @@ function psf=calcLightSheetPsf(xRange,yRange,zRange,tilt,excitation,modulation,r
     
     % Check for attenuation compensation parameters and modify pupil
     % function if needed
-    if sigmaU ~= 0 && sigmaV ~= 0
+    if sigmaU ~= 0 || sigmaV ~= 0
         pupilFunctor = @(U,V) pupilFunctor(U,V)...
-            .* exp((sigmaU - 1) .* U) .* exp((sigmaV - 1) .* V);
+            .* exp(sigmaU .* (U - 1)) .* exp(sigmaV .* (V-1));
     end
     
     % Check for super-Gaussian window parameters and modify pupil
     % function if needed
     if A_SG ~= 0 && k_SG ~= 0 && sigma_SG ~=0
+%         pupilFunctor = @(U,V) pupilFunctor(U,V)...
+%             .* A_SG .* exp(-1 .* (k_SG .* (U + V)).^sigma_SG);
         pupilFunctor = @(U,V) pupilFunctor(U,V)...
-            .* A_SG .* exp(-1 .* (k_SG .* (U + V)).^sigma_SG);
+            .* A_SG .* exp(-1 .* ((k_SG .* U).^sigma_SG + (k_SG .* V).^sigma_SG));
     end
     
     %Assume circular polarization propagating along the x-axis and

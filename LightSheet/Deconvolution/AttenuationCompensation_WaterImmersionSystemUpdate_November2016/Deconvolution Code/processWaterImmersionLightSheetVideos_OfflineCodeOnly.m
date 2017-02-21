@@ -75,8 +75,12 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
 %         folderNames = {'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2016-12-07_CalibrationMeasurements'};
 %         folderNames = {'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2016-12-09_pixelreassignment\Airystep200_scan100_int25'};
 %         folderNames = {'H:\NEW_SYSTEM_RESULTS\2016-12-14_compAiry\absorbance55cm-1\2016-12-14 15_12_36.642\TestFolder'};
-        folderNames = {'H:\NEW_SYSTEM_RESULTS\2016-12-20_CalibrationMeasurements\BeadData_NA0.42_DetIris03mm\2016-12-20 16_59_36.625'};
         
+%         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\testsample'};
+        folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\abs27pt5cm-1'};
+%         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\abs55cm-1'};
+%         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\test_focalTilt'};
+
     end
     if (nargin<2) 
         reprocessData=true;
@@ -93,18 +97,22 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
     end
     if (nargin<4)
 %         centerOffset=[0,1e-05];
-        centerOffset=[0 0]*1e-6; % [y x] in metres
+        centerOffset=[0,0];
+%         centerOffset=[0 -11]*1e-6; % [y x] in metres
     end
     if (nargin<6)
         %perspectiveScaling: two-element vector in m^-1, components ordered vertical horizontal
-        perspectiveScaling=[0 0];
+        perspectiveScaling=[0.5 1.2]*1e-3
+%         perspectiveScaling=[0.3822 -0.4994]*1e-3; %first calc for attn
+%         comp
 %         perspectiveScaling=[0.5796 0.7339]*1e-3;
 %         perspectiveScaling=[0.0008344,-0.0002917];
     end
     if (nargin<5)
         %scanShear also a two-element vector in m^-1 ([vertical
         %horizontal])
-        scanShear=[0 0];
+        scanShear=[0.0002 0.0302];
+%         scanShear=[-0.0004 0.0208];
 %         scanShear=[-0.0594,-0.0044];
     end
     
@@ -113,7 +121,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
     end
     
     if nargin < 7
-        sampleAttenuation = 0 * 100; % [m^-1]
+        sampleAttenuation = 27.5 * 100; % [m^-1]
     end
  
     
