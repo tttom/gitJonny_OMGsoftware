@@ -4,3 +4,6 @@
 *.fig
 *.png
 *.asv
+*.avi
+*.zip
+*.DS_Store

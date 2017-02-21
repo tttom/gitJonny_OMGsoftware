@@ -1,0 +1,6 @@
+This work is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License. 
+To view a copy of this license, visit http://creativecommons.org/licenses/by-sa/4.0/.
+
+Reference:
+
+J. Nylk, M. V. G. Kristensen, M. Mazilu, A. K. Thayil, C. A. Mitchell, E. C. Campbell, S. J. Powis, F. J. Gunn-Moore, and K. Dholakia, "Development of a graded index microlens based fiber optical trap and its characterization using principal component analysis," Biomed. Opt. Express 6, 1512-1519 (2015)

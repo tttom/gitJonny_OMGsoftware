@@ -41,7 +41,7 @@ function [outputArray,outputColRange,outputRowRange]=rotate2DArray(inputArray,ro
     
     if nargin<6
         % default display rotated image
-       displayRotation=1; 
+       displayRotation=0; 
     end
     
     %check rowRange and colRange are zero centred, correct if not
