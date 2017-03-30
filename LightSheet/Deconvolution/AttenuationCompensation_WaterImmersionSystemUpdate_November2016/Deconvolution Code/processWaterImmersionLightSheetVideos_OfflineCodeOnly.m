@@ -77,7 +77,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
 %         folderNames = {'H:\NEW_SYSTEM_RESULTS\2016-12-14_compAiry\absorbance55cm-1\2016-12-14 15_12_36.642\TestFolder'};
         
 %         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\testsample'};
-        folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\abs27pt5cm-1'};
+        folderNames = {'E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan1\2017-03-27 17_34_52.890\testnoattn','E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan3\2017-03-27 17_53_13.354\testnoattn','E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan4\2017-03-27 18_06_25.646\testnoattn','E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan5\2017-03-27 18_15_27.067\testnoattn'};
 %         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\abs55cm-1'};
 %         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\test_focalTilt'};
 
@@ -121,7 +121,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
     end
     
     if nargin < 7
-        sampleAttenuation = 27.5 * 100; % [m^-1]
+        sampleAttenuation = 0 * 100; % [m^-1]
     end
  
     
