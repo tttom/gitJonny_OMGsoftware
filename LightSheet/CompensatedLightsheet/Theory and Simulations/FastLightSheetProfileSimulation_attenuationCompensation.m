@@ -25,18 +25,18 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
     %default inputs
     if nargin < 1
 %         zRange = [-50:0.05:50] * 1e-6;  % transverse beam axis [metres]
-        zRange = [-50:0.1:10] * 1e-6;  % transverse beam axis [metres]
+        zRange = [-50:0.1:50] * 1e-6;  % transverse beam axis [metres]
     end
     if nargin < 2
 %         xRange = [-100:1:100] * 1e-6; % propagation axis [metres]
-        xRange = [-10:1:310] * 1e-6;
+        xRange = [-1:1:1] * 1e-6;
     end
     if nargin < 3
         lambda = 532e-9;    % [metres]
     end
     if nargin < 4
-%         NA = 0.42;
-        NA = 0.4;
+        NA = 0.42;
+%         NA = 0.4;
     end
     if nargin < 5
         alpha = 7;
@@ -49,7 +49,8 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
     end
     if nargin < 7
 %         sigma_exp = 0.54;
-        sigma_exp = 0;
+%         sigma_exp = 0;
+        sigma_exp = 0.46;
     end
     if nargin < 8
         sigma_lin = 0.54;
@@ -66,7 +67,7 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
         C_abs = 0;   % [metres^-1]
     end
     if nargin < 12
-        outputFolder = 'C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\2016-12-08';
+        outputFolder = 'C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\2017-03-27';
     end
     if nargin < 13
 %         Flag_imageSimulation = 1;   % performs image convolution and deconvolution
@@ -130,8 +131,8 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
     pupilAmplitudeMaskV = @(U,V) 1 * (V >= -VPupilSize & V <= VPupilSize);
 
     % set super-Gaussian apodization
-%     sigma_superGaussian = 8;    %super-Gaussian order (must be even!)
-    sigma_superGaussian = 100;    % TO REMOVE EFFECT OF SUPER-GUASSIAN APODIZATION
+    sigma_superGaussian = 8;    %super-Gaussian order (must be even!)
+%     sigma_superGaussian = 100;    % TO REMOVE EFFECT OF SUPER-GUASSIAN APODIZATION
     superGaussian = @(U,V) exp(-(sqrt(2) * U).^ sigma_superGaussian) .* exp(-(sqrt(2) * V).^ sigma_superGaussian);
 %     superGaussian = @(U,V) exp(-(sqrt(2) * sqrt(U.^2 + V.^2)).^ sigma_superGaussian); % CIRCULAR PUPIL
     
@@ -140,11 +141,11 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
     % compensated beam definition
     switch compensation_type
         case 'Exponential'
-%             pupilPhaseModulations{1} = @(U,V) exp(2i * pi * alpha / (NA / NA_pupil).^3 * V.^3)...
-%                 .* exp(sigma_exp / (NA / NA_pupil) * (V - 1)) .*
-%                 superGaussian(U,V);    % exponential compenation factor (1+1D Airy)
-            pupilPhaseModulations{1} = @(U,V) exp(2i * pi * alpha / (NA / NA_pupil).^3 * (U.^3 + V.^3))...
-                .* exp(sigma_exp / (NA / NA_pupil) * (V - 1)) .* superGaussian(U,V);    % exponential compenation factor (2+1D Airy)
+            pupilPhaseModulations{1} = @(U,V) exp(2i * pi * alpha / (NA / NA_pupil).^3 * V.^3)...
+                .* exp(sigma_exp / (NA / NA_pupil) * (V - 1)) ...
+                .* superGaussian(U,V);    % exponential compenation factor (1+1D Airy)
+%             pupilPhaseModulations{1} = @(U,V) exp(2i * pi * alpha / (NA / NA_pupil).^3 * (U.^3 + V.^3))...
+%                 .* exp(sigma_exp / (NA / NA_pupil) * (V - 1)) .* superGaussian(U,V);    % exponential compenation factor (2+1D Airy)
             fprintf('Pupil function: %s.\n Parameters:\n Alpha = %f.\n Sigma = %f.\n',func2str(pupilPhaseModulations{1}),alpha,sigma_exp);
         case 'Linear'
             pupilPhaseModulations{1} = @(U,V) exp(2i * pi * alpha / (NA / NA_pupil).^3 * V.^3)...
@@ -161,10 +162,10 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
            fprintf('Pupil function: %s.\n Parameters:\n Alpha = %f.\n Sigma = %f.\n',func2str(pupilPhaseModulations{1}),alpha,sigma_exp);
     end
     % standard beam definition
-%     pupilPhaseModulations{2} = @(U,V) exp(2i * pi * alpha / (NA / NA_pupil).^3 * V.^3)...
-%         .* superGaussian(U,V);  % no compensation
-    pupilPhaseModulations{2} = @(U,V) exp(2i * pi * alpha / (NA / NA_pupil).^3 * (U.^3 + V.^3))...
-        .* superGaussian(U,V);  % no compensation    
+    pupilPhaseModulations{2} = @(U,V) exp(2i * pi * alpha / (NA / NA_pupil).^3 * V.^3)...
+        .* superGaussian(U,V);  % no compensation
+%     pupilPhaseModulations{2} = @(U,V) exp(2i * pi * alpha / (NA / NA_pupil).^3 * (U.^3 + V.^3))...
+%         .* superGaussian(U,V);  % no compensation    
     
     % allocate memory for PSFs
     PSF = zeros(length(zRange),length(xRange),length(pupilPhaseModulations));
