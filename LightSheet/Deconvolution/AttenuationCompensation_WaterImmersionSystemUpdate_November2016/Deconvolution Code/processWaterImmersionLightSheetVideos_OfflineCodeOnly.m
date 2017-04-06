@@ -77,9 +77,13 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
 %         folderNames = {'H:\NEW_SYSTEM_RESULTS\2016-12-14_compAiry\absorbance55cm-1\2016-12-14 15_12_36.642\TestFolder'};
         
 %         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\testsample'};
-        folderNames = {'E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan1\2017-03-27 17_34_52.890\testnoattn','E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan3\2017-03-27 17_53_13.354\testnoattn','E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan4\2017-03-27 18_06_25.646\testnoattn','E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan5\2017-03-27 18_15_27.067\testnoattn'};
+%         folderNames = {'E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan1\2017-03-27 17_34_52.890\testnoattn','E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan3\2017-03-27 17_53_13.354\testnoattn','E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan4\2017-03-27 18_06_25.646\testnoattn','E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan5\2017-03-27 18_15_27.067\testnoattn'};
 %         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\abs55cm-1'};
 %         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\test_focalTilt'};
+%         folderNames = {'F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_77cm-1'};
+%         folderNames = {'F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_172cm-1'};
+%         folderNames = {'F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_0cm-1'};
+        folderNames = {'F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_50cm-1'};
 
     end
     if (nargin<2) 
@@ -102,7 +106,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
     end
     if (nargin<6)
         %perspectiveScaling: two-element vector in m^-1, components ordered vertical horizontal
-        perspectiveScaling=[0.5 1.2]*1e-3
+        perspectiveScaling=[0.5 1.2]*1e-3;
 %         perspectiveScaling=[0.3822 -0.4994]*1e-3; %first calc for attn
 %         comp
 %         perspectiveScaling=[0.5796 0.7339]*1e-3;
@@ -121,7 +125,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
     end
     
     if nargin < 7
-        sampleAttenuation = 0 * 100; % [m^-1]
+        sampleAttenuation = 50 * 100; % [m^-1]
     end
  
     
@@ -229,7 +233,7 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
                     logMessage('Loading %s...',inputFileName);
                     try
                         recordedImageStack=readDataCubeFromAviFile(inputFileName);
-                        recordedImageStack = flip(recordedImageStack,2);
+                        recordedImageStack = flipdim(recordedImageStack,2);
                     catch Exc
                         logMessage('Failed to load data stack from %s!',inputFileName);
                         recordedImageStack=[];

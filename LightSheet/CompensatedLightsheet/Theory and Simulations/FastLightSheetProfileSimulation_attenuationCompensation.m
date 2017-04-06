@@ -48,9 +48,10 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
 %         compensation_type = 'Peak';
     end
     if nargin < 7
-%         sigma_exp = 0.54;
+        sigma_exp = 0.54;
+%         sigma_exp = 0.27;
 %         sigma_exp = 0;
-        sigma_exp = 0.46;
+%         sigma_exp = 0.46;
     end
     if nargin < 8
         sigma_lin = 0.54;
