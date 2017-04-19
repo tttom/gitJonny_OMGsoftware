@@ -5,5 +5,7 @@
 *.png
 *.asv
 *.avi
+*.svg
+*.pdf
 *.zip
 *.DS_Store

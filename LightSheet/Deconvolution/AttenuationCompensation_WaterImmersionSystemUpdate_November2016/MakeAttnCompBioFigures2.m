@@ -1,8 +1,8 @@
-load('E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan2\2017-03-27 17_44_32.811\recording0_lambda532nm_alpha7_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat','restoredDataCube','yRange','zRange');
+load('F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_172cm-1\scan2\2017-03-27 17_44_32.811\recording0_lambda532nm_alpha7_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat','restoredDataCube','yRange','zRange');
 scan2nocomp=restoredDataCube(11:end-10,:,:); clear restoredDataCube; yRange=yRange*1e6; zRange=zRange*1e6;
-load('E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan2\2017-03-27 17_44_32.811\recording0_lambda532nm_alpha7_beta100_ASG0.71_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
+load('F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_172cm-1\scan2\2017-03-27 17_44_32.811\recording0_lambda532nm_alpha7_beta100_ASG0.71_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
 scan2highint=restoredDataCube(11:end-10,:,:); clear restoredDataCube;
-load('E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan2\2017-03-27 17_44_32.811\recording0_lambda532nm_alpha7_beta100_sigmaU0.00_sigmaV0.66_ASG1.31_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
+load('F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_172cm-1\scan2\2017-03-27 17_44_32.811\recording0_lambda532nm_alpha7_beta100_sigmaU0.00_sigmaV0.66_ASG1.31_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
 scan2fullcomp=restoredDataCube(11:end-10,:,:); clear restoredDataCube;
 
 scan2nocomp = scan2nocomp .* (scan2nocomp>0);
@@ -21,15 +21,15 @@ subplot(3,1,2); imagesc(yRange(yRange_start:yRange_end),zRange(zRange_start:zRan
 title('no compnesation - increased power');
 subplot(3,1,3); imagesc(yRange(yRange_start:yRange_end),zRange(zRange_start:zRange_end),squeeze(max(scan2fullcomp(:,yRange_start:yRange_end,zRange_start:zRange_end),[],1))'); colormap hot; xlabel('x-axis [µm]'); ylabel('z-axis [µm]');axis image;
 title('with compensation');
-saveas(h,'C:\Users\Jonathan\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\Deconvolution\AttenuationCompensation_WaterImmersionSystemUpdate_November2016\nocomp-highint-fullcomp2','fig');
+saveas(h,'F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_172cm-1\nocomp-highint-fullcomp2','fig');
 
 clear scan2nocomp scan2highint scan2fullcomp;
 
-load('E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan3\2017-03-27 17_53_13.354\recording0_lambda532nm_alpha7_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat','restoredDataCube','yRange','zRange');
+load('F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_172cm-1\scan3\2017-03-27 17_53_13.354\recording0_lambda532nm_alpha7_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat','restoredDataCube','yRange','zRange');
 scan3nocomp=restoredDataCube(11:end-10,:,:); clear restoredDataCube;yRange=yRange*1e6; zRange=zRange*1e6;
-load('E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan3\2017-03-27 17_53_13.354\recording0_lambda532nm_alpha7_beta100_sigmaU0.00_sigmaV0.33_ASG0.77_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
+load('F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_172cm-1\scan3\2017-03-27 17_53_13.354\recording0_lambda532nm_alpha7_beta100_sigmaU0.00_sigmaV0.33_ASG0.77_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
 scan3halfcomp=restoredDataCube(11:end-10,:,:); clear restoredDataCube;
-load('E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan3\2017-03-27 17_53_13.354\recording0_lambda532nm_alpha7_beta100_sigmaU0.00_sigmaV0.66_ASG1.31_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
+load('F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_172cm-1\scan3\2017-03-27 17_53_13.354\recording0_lambda532nm_alpha7_beta100_sigmaU0.00_sigmaV0.66_ASG1.31_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
 scan3fullcomp=restoredDataCube(11:end-10,:,:); clear restoredDataCube;
 
 scan3nocomp = scan3nocomp .* (scan3nocomp>0);
@@ -71,7 +71,7 @@ subplot(3,4,8); imagesc(yRange(yRange_start:yRange_end),zRange(zRange_start:zRan
 title('half compensation');
 subplot(3,4,12); imagesc(yRange(yRange_start:yRange_end),zRange(zRange_start:zRange_end),squeeze(max(scan3fullcomp(:,yRange_start:yRange_end,zRange_start:zRange_end),[],1))'); colormap hot; xlabel('x-axis [µm]'); ylabel('z-axis [µm]');axis image;
 title('full compensation');
-saveas(g,'C:\Users\Jonathan\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\Deconvolution\AttenuationCompensation_WaterImmersionSystemUpdate_November2016\sample3_nocomp-halfcomp-fullcomp2','fig');
+saveas(g,'F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_172cm-1\sample3_nocomp-halfcomp-fullcomp2','fig');
 
 clear scan3nocomp scan3halfcomp scan3fullcomp;
 
@@ -93,11 +93,11 @@ clear scan3nocomp scan3halfcomp scan3fullcomp;
 % 
 % clear scan4nocomp scan4halfcomp scan4fullcomp;
 
-load('E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan5\2017-03-27 18_15_27.067\recording0_lambda532nm_alpha7_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat','restoredDataCube','yRange','zRange');
+load('F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_77cm-1\scan5\2017-03-27 18_15_27.067\recording0_lambda532nm_alpha7_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat','restoredDataCube','yRange','zRange');
 scan5nocomp=restoredDataCube(11:end-10,:,:); clear restoredDataCube;yRange=yRange*1e6; zRange=zRange*1e6;
-load('E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan5\2017-03-27 18_15_27.067\recording0_lambda532nm_alpha7_beta100_sigmaU0.00_sigmaV0.33_ASG0.77_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
+load('F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_77cm-1\scan5\2017-03-27 18_15_27.067\recording0_lambda532nm_alpha7_beta100_sigmaU0.00_sigmaV0.33_ASG0.77_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
 scan5halfcomp=restoredDataCube(11:end-10,:,:); clear restoredDataCube;
-load('E:\RESULTS\20170327_DFopercula_attnComp\sample2\scan5\2017-03-27 18_15_27.067\recording0_lambda532nm_alpha7_beta100_sigmaU0.00_sigmaV0.66_ASG1.31_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
+load('F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_77cm-1\scan5\2017-03-27 18_15_27.067\recording0_lambda532nm_alpha7_beta100_sigmaU0.00_sigmaV0.66_ASG1.31_kSG1.41_sigmaSG8.00.mat','restoredDataCube');
 scan5fullcomp=restoredDataCube(11:end-10,:,:); clear restoredDataCube;
 
 scan5nocomp = scan5nocomp .* (scan5nocomp>0);
@@ -114,7 +114,7 @@ scan5fullcomp = scan5fullcomp .* (scan5fullcomp>0);
 
 yRange_start = 742;
 yRange_end = 1760;
-zRange_start = 1;
+zRange_start = 76;
 zRange_end = 500;
 
 m=figure;
@@ -147,7 +147,7 @@ subplot(3,4,8); imagesc(yRange(yRange_start:yRange_end),zRange(zRange_start:zRan
 title('half compensation');
 subplot(3,4,12); imagesc(yRange(yRange_start:yRange_end),zRange(zRange_start:zRange_end),squeeze(max(scan5fullcomp(:,yRange_start:yRange_end,zRange_start:zRange_end),[],1))'); colormap hot; xlabel('x-axis [µm]'); ylabel('z-axis [µm]');axis image;
 title('full compensation');
-saveas(m,'C:\Users\Jonathan\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\Deconvolution\AttenuationCompensation_WaterImmersionSystemUpdate_November2016\sample5_nocomp-halfcomp-fullcomp2','fig');
+saveas(m,'F:\Stored Files\DataForJonny_2017-03-30_Ferrier_Opercula\20170327_DFopercula_attnComp\sample2\Cabs_172cm-1\sample5_nocomp-halfcomp-fullcomp2','fig');
 
 clear scan5nocomp scan5halfcomp scan5fullcomp;
 

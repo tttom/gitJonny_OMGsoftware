@@ -17,7 +17,7 @@ crossArray(round(imHeight / 2) - 3:round(imHeight / 2) + 3,floor(imWidth / 4):ce
 simpleObjects = 1;
 
 
-rng(random_seed);
+% rng(random_seed);
 
 
 if simpleObjects
@@ -52,11 +52,11 @@ end
 noiseFreeImageArray = noiseFreeImageArray / max(noiseFreeImageArray(:));
 imageArray = noiseFreeImageArray + 1 .* rand(size(noiseFreeImageArray));
 imageArray = imageArray / max(imageArray(:));
-for idx = 1:nFrames
-    imageArray(:,:,idx) = imageArray(:,:,idx) .* (1 + 0.1 .* randn(1)); % global fluctuations (noise and signal)
-end
+% for idx = 1:nFrames
+%     imageArray(:,:,idx) = imageArray(:,:,idx) .* (1 + 0.1 .* randn(1)); % global fluctuations (noise and signal)
+% end
 
-[filteredArray,E,PP,val0] = function_noiseRemoval(imageArray, 20, 2:3);
+[filteredArray,E,PP,val0] = function_noiseRemoval(imageArray, 20, 1:1);
 
 val0 = val0 / sum(val0(:));
 PCA_Strength = max(val0,[],1);
@@ -81,7 +81,7 @@ filteredArray = filteredArray / max(filteredArray(:));
 
 if 1
     figure(3);
-    for idx = 1: 1
+    for idx = 1:nFrames
         subplot(1,3,1);
         imagesc(noiseFreeImageArray(:,:,idx));
         axis image;
