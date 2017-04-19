@@ -7,8 +7,9 @@ function convertLSMatfileData2ImageStack(folderNames,dataTypes)
 %Select data sets to convert.  Options are 'lightSheetPsf', 'recorded', and
 %'deconvolved'
     if nargin<2
-%        dataTypes={'recorded','deconvolved'};
-        dataTypes={'lightSheetPsf','deconvolved'};
+       dataTypes={'deconvolved'};
+%         dataTypes={'lightSheetPsf','deconvolved'};
+%         dataTypes={'recorded'};
     end
     
 %Error catching in the case that there is no input folder

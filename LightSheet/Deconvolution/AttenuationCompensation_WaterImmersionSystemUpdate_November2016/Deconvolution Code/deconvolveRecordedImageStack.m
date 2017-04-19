@@ -40,8 +40,8 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
     end
     lightSheetPsf=lightSheetPsf.*GaussEnvelope;
     
-    % normalise
-    lightSheetPsf = lightSheetPsf ./ max(lightSheetPsf(:));
+%     % normalise
+%     lightSheetPsf = lightSheetPsf ./ max(lightSheetPsf(:));
     
     % Implement attenuation of the light-sheet
     absorption_decay = zeros(size(lightSheetPsf));
@@ -49,8 +49,8 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf xRange,yRan
         absorption_decay(1,:,n)=exp(-sampleAttenuation * yRange); % simulate "perfect" absorption
     end
     lightSheetPsf = lightSheetPsf .* absorption_decay;
-    % re-normalise
-    lightSheetPsf = lightSheetPsf ./ max(lightSheetPsf(:));
+%     % re-normalise
+%     lightSheetPsf = lightSheetPsf ./ max(lightSheetPsf(:));
     
     
     
@@ -214,8 +214,8 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf tRange]=dec
         else
             sigmaV = 0;
         end
-    compensationScalingParameter = 10.478 * (sigmaV.^2) + (1.8838 * sigmaV) + 1;
-    lightSheetOtf = lightSheetOtf * compensationScalingParameter;
+%     compensationScalingParameter = 10.478 * (sigmaV.^2) + (1.8838 * sigmaV) + 1;
+%     lightSheetOtf = lightSheetOtf * compensationScalingParameter;
     
 %     lightSheetEnvelope = zeros([size(lightSheetPsf,1) size(lightSheetPsf,2) 2]);
 %     lightSheetEnvelope(:,:,1) = max(lightSheetPsf,[],3);
