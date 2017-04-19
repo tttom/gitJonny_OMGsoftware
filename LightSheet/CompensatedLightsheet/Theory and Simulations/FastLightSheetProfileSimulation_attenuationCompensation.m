@@ -13,11 +13,6 @@
 %%%
 %%% END %%%
 
-%%%
-%%% NEED TO CHECK THE CODE THOROUGHLY AS I HAVE PLAYING WITH IT FOR
-%%% PARTICULAR SIMULATIONS.
-%%%
-
 
 function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,lambda,NA,alpha,compensation_type...
     ,sigma_exp,sigma_lin,sigma_peak,x_peak,C_abs,outputFolder,Flag_imageSimulation,deconvolution_lightSheet,amp_peak)
@@ -64,19 +59,19 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
         x_peak = 0.75;
     end
     if nargin < 11
-%         C_abs = 64.95 * 100;   % [metres^-1]
-        C_abs = 0;   % [metres^-1]
+        C_abs = 64.95 * 100;   % [metres^-1]
+%         C_abs = 0;   % [metres^-1]
     end
     if nargin < 12
-        outputFolder = 'C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\2017-03-27';
+        outputFolder = 'C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\2017-04-19_tweakedOTFcalc';
     end
     if nargin < 13
-%         Flag_imageSimulation = 1;   % performs image convolution and deconvolution
-        Flag_imageSimulation = 0;   % performs image convolution and deconvolution
+        Flag_imageSimulation = 1;   % performs image convolution and deconvolution
+%         Flag_imageSimulation = 0;   % performs image convolution and deconvolution
     end
     if nargin < 14
-        deconvolution_lightSheet = 'Normal';      % Use calculated light-sheet with no attenuation included. 
-%         deconvolution_lightSheet = 'APriori';     % Use calculated light-sheet with attenuation included.
+%         deconvolution_lightSheet = 'Normal';      % Use calculated light-sheet with no attenuation included. 
+        deconvolution_lightSheet = 'APriori';     % Use calculated light-sheet with attenuation included.
     end
     if nargin < 15
         amp_peak = 0.5;
@@ -200,6 +195,10 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
         % sum amplitude over pupil
         total_pupil_amplitude = sum(abs(pupilFunctor(0,pupilRangeV)));
         fprintf('Total pupil amplitude = %f.\n',total_pupil_amplitude);
+        total_pupil_squared_amplitude = sum(abs(pupilFunctor(0,pupilRangeV)).^2);
+        fprintf('Total pupil squared amplitude = %f.\n',total_pupil_squared_amplitude);
+        total_pupil_amplitude_squared = sum(abs(pupilFunctor(0,pupilRangeV))).^2;
+        fprintf('Total pupil amplitude squared = %f.\n',total_pupil_amplitude_squared);
         
         % plot pupil amplitude
         figure(fig_pupil_amplitude);
@@ -253,8 +252,9 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
         detection_DOF = exp(-1 * zCoords.^2 / 2 / DOF_half_width^2);
         psf = psf .* detection_DOF;
         
-        % normalise
-        psf = psf ./ max(psf(:));
+% % % % % % % %         % TOTFC
+% % % % % % % %         % normalise
+% % % % % % % %         psf = psf ./ max(psf(:));
         
         % take a copy of the PSF before applying absorption
         psf_before_absorption = psf;
@@ -262,8 +262,10 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
         % simulate "perfect" absorption
         absorption_decay = repmat(exp(-C_abs * xRange),[length(zRange) 1]);
         psf = psf .* absorption_decay;
-        % re-normalise
-        psf = psf ./ max(psf(:));
+        
+% % % % % % % %         % TOTFC
+% % % % % % % %         % re-normalise
+% % % % % % % %         psf = psf ./ max(psf(:));
         
         % write psf
         PSF(:,:,Idx) = psf;
@@ -296,13 +298,17 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
         % determine MTF_z as a function of x-axis coordinate
         MTF_z = abs(fftshift(fft(psf,[],1),1));
         % normalisation
-        MTF_z = MTF_z ./ max(MTF_z(:));
+% % % % % %             % TOTFC
+                        xRange0=find(xRange>=0,1); % approx. closest value to x=0
+                        MTF_z = MTF_z ./ max(MTF_z(:,xRange0));
+% % % % % %              MTF_z = MTF_z ./ max(MTF_z(:));
         MTF_z = MTF_z(ceil(size(MTF_z,1) / 2):end,:); % range, kz = [0:1]
         
-        if Idx == 1
-            MTF_z = MTF_z / pupilMaxVal / pupilNormVal;
-            fprintf('MTF scaling factor = %f.\n',1 / pupilMaxVal / pupilNormVal);
-        end
+% % % % % % % %         % TOTFC
+% % % % % % % %         if Idx == 1
+% % % % % % % %             MTF_z = MTF_z / pupilMaxVal / pupilNormVal;
+% % % % % % % %             fprintf('MTF scaling factor = %f.\n',1 / pupilMaxVal / pupilNormVal);
+% % % % % % % %         end
         
         % plot MTF
         figure(fig_MTF);
@@ -387,14 +393,16 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
                     otherwise
                 end
                 
-
-%                 % Try deconvolution with normal Airy PSF
-%                 figure(1);
-%                 deconvolution_PSF_axes = get(gcf,'Children');
-%                 deconvolution_PSF_hanlde = get(deconvolution_PSF_axes(1),'Children');
-%                 psf = get(deconvolution_PSF_hanlde,'CData');
+                % Set attenuation of light-sheet for deconvolution purposes
+                % incorrectly
                 
-                
+                C_abs_deconv = C_abs * 1;
+                psf = psf_before_absorption;
+                absorption_decay_deconv = repmat(exp(-C_abs_deconv * xRange),[length(zRange) 1]);
+                psf = psf .* absorption_decay_deconv;
+% % % % %                 % TOTFC
+% % % % %                 % re-normalise
+% % % % %                 psf = psf ./ max(psf(:));
                 
                 
                 % Zero-pad and centre PSF
@@ -409,12 +417,16 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
                 
                 % Calculate Deconvolution filter
                 lightSheetOtf = fftshift(fft(ifftshift(padded_psf,1),[],1),1);
-                lightSheetOtf = lightSheetOtf ./ max(abs(lightSheetOtf(:))); % Maintain the mean brightness
+% % % % % %                 % TOTFC
+                            xRange0=find(xRange>=0,1); % approx. closest value to x=0
+                            lightSheetOtf = lightSheetOtf ./ max(abs(lightSheetOtf(:,xRange0)));
+% % % % % % %                 lightSheetOtf = lightSheetOtf ./ max(abs(lightSheetOtf(:))); % Maintain the mean brightness
                 
-                if Idx == 1
-                    lightSheetOtf = lightSheetOtf / pupilMaxVal / pupilNormVal;
-                    fprintf('OTF scaling factor = %f.\n',1 / pupilMaxVal / pupilNormVal);
-                end
+% % % % % %                 % TOTFC
+% % % % % %                 if Idx == 1
+% % % % % %                     lightSheetOtf = lightSheetOtf / pupilMaxVal / pupilNormVal;
+% % % % % %                     fprintf('OTF scaling factor = %f.\n',1 / pupilMaxVal / pupilNormVal);
+% % % % % %                 end
                 
                 lightSheetDeconvFilter = conj(lightSheetOtf) ./ (abs(lightSheetOtf).^2 ...
                     + repmat(excitationNoiseToSignalRatio.^2,[1 size(lightSheetOtf,2)]));
