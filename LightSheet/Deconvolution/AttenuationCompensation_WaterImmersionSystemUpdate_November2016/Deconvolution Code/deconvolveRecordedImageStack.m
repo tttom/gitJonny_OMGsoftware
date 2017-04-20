@@ -205,17 +205,21 @@ function [restoredDataCube lightSheetDeconvFilter lightSheetOtf ZOtf tRange]=dec
 
     lightSheetOtf=fftshift(fft(ifftshift(lightSheetDeconvPsf(1,:,:),3),[],3),3);
     clear lightSheetDeconvPsf;
-    lightSheetOtf=lightSheetOtf./max(abs(lightSheetOtf(:))); % Maintain the mean brightness
+    yRange0=find(yRange>=0,1); % approx. closest value to x=0
+    lightSheetOtf=lightSheetOtf./max(abs(lightSheetOtf(:,yRange0,:))); % set MTF(kz=0,x=0)=1;
     
     % Scale OTF for attenuation compensation parameters
     % Check for attenuation compensation parameters
         if isfield(config.modulation,'sigmaV')
             sigmaV = abs(config.modulation.sigmaV);
+            A_SG = config.modulation.A_SG;
+            A_0 = 0.48;
+            compensationScalingParameter = (A_SG * exp(-1*sigmaV) / A_0)^2;
         else
-            sigmaV = 0;
+            compensationScalingParameter = 1;
         end
 %     compensationScalingParameter = 10.478 * (sigmaV.^2) + (1.8838 * sigmaV) + 1;
-%     lightSheetOtf = lightSheetOtf * compensationScalingParameter;
+    lightSheetOtf = lightSheetOtf * compensationScalingParameter;
     
 %     lightSheetEnvelope = zeros([size(lightSheetPsf,1) size(lightSheetPsf,2) 2]);
 %     lightSheetEnvelope(:,:,1) = max(lightSheetPsf,[],3);
