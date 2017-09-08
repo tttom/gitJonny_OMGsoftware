@@ -19,11 +19,12 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
 
     %default inputs
     if nargin < 1
-%         zRange = [-50:0.05:50] * 1e-6;  % transverse beam axis [metres]
-        zRange = [-50:0.1:50] * 1e-6;  % transverse beam axis [metres]
+        zRange = [-50:0.05:50] * 1e-6;  % transverse beam axis [metres]
+%         zRange = [-50:0.1:50] * 1e-6;  % transverse beam axis [metres]
+
     end
     if nargin < 2
-%         xRange = [-100:1:100] * 1e-6; % propagation axis [metres]
+%         xRange = [-175:1:175] * 1e-6; % propagation axis [metres]
         xRange = [-1:1:1] * 1e-6;
     end
     if nargin < 3
@@ -43,10 +44,13 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
 %         compensation_type = 'Peak';
     end
     if nargin < 7
-        sigma_exp = 0.54;
-%         sigma_exp = 0.27;
+%         sigma_exp = 0.54;
+        sigma_exp = 0.27;
 %         sigma_exp = 0;
 %         sigma_exp = 0.46;
+%         sigma_exp = 0.5;
+%         sigma_exp = 0.3;
+%         sigma_exp = 0.1;
     end
     if nargin < 8
         sigma_lin = 0.54;
@@ -63,11 +67,11 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
 %         C_abs = 0;   % [metres^-1]
     end
     if nargin < 12
-        outputFolder = 'C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\2017-04-19_tweakedOTFcalc';
+        outputFolder = 'C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\2017-06-27 - Test';
     end
     if nargin < 13
-        Flag_imageSimulation = 1;   % performs image convolution and deconvolution
-%         Flag_imageSimulation = 0;   % performs image convolution and deconvolution
+%         Flag_imageSimulation = 1;   % performs image convolution and deconvolution
+        Flag_imageSimulation = 0;
     end
     if nargin < 14
 %         deconvolution_lightSheet = 'Normal';      % Use calculated light-sheet with no attenuation included. 
@@ -301,6 +305,11 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
 % % % % % %             % TOTFC
                         xRange0=find(xRange>=0,1); % approx. closest value to x=0
                         MTF_z = MTF_z ./ max(MTF_z(:,xRange0));
+                        A_sigma = 1 / pupilMaxVal;
+                        A_0 = pupilNormVal / pupilMaxVal;
+                        if Idx == 1
+                            MTF_z = MTF_z * A_sigma^2 * exp(-1 * 2 * sigma_exp / (NA / NA_pupil)) / A_0^2;
+                        end
 % % % % % %              MTF_z = MTF_z ./ max(MTF_z(:));
         MTF_z = MTF_z(ceil(size(MTF_z,1) / 2):end,:); % range, kz = [0:1]
         
@@ -337,17 +346,33 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
         ylim([0 1]);
         drawnow;shg;
         
+        % plot thresholded MTF
+        figure();
+        subplot(2,1,Idx);
+        contour(xRange * 1e6,kzRange,MTF_z,[0.05]);
+        if Idx == 1
+            title(sprintf('MTF(x,kz). \n\n MTF scaling factor = %f.\n',1 / pupilMaxVal / pupilNormVal));
+        else
+            title('MTF(x,kz)');
+        end
+        xlabel('x [um]');ylabel('kz');
+        ylim([0 1]);
+        drawnow;shg;
+        
         
         % Simulate imaging of target
         switch Flag_imageSimulation
             case 1
                 % Load image_target
-                image_target_base =...
-                    single(imread('C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\03-foundation-colour.bmp'));
-%                 image_target = imresize(image_target,2);
-                image_target_base = repmat(image_target_base,[1 2 1]); 
-                image_target = ones(size(repmat(image_target_base,[2 1 1]))) * max(image_target_base(:));
-                image_target(floor(size(image_target_base,1) / 2):floor(size(image_target_base,1) / 2) -1 + size(image_target_base,1),:,:) = image_target_base;
+%                 image_target_base =...
+%                     single(imread('C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\03-foundation-colour.bmp'));
+%                 image_target_base
+% %                 image_target = imresize(image_target,2);
+%                 image_target_base = repmat(image_target_base,[1 2 1]); 
+%                 image_target = ones(size(repmat(image_target_base,[2 1 1]))) * max(image_target_base(:));
+%                 image_target(floor(size(image_target_base,1) / 2):floor(size(image_target_base,1) / 2) -1 + size(image_target_base,1),:,:) = image_target_base;
+                image_target =...
+                    single(imread('C:\Users\Jonathan Nylk\Documents\GitHub\gitJonny_OMGsoftware\LightSheet\CompensatedLightsheet\Theory and Simulations\1D_TestProfile_200nm_600nm_1000nm_2000nm_5000nm_thickLines.png'));
                 % Normalise
                 if min(image_target(:)) < 0
                     image_target = image_target .* (image_target>0);    % Ensures all +ve values
@@ -396,7 +421,7 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
                 % Set attenuation of light-sheet for deconvolution purposes
                 % incorrectly
                 
-                C_abs_deconv = C_abs * 1;
+                C_abs_deconv = C_abs * 1.0;
                 psf = psf_before_absorption;
                 absorption_decay_deconv = repmat(exp(-C_abs_deconv * xRange),[length(zRange) 1]);
                 psf = psf .* absorption_decay_deconv;
@@ -420,6 +445,9 @@ function FastLightSheetProfileSimulation_attenuationCompensation(zRange,xRange,l
 % % % % % %                 % TOTFC
                             xRange0=find(xRange>=0,1); % approx. closest value to x=0
                             lightSheetOtf = lightSheetOtf ./ max(abs(lightSheetOtf(:,xRange0)));
+                            if Idx == 1
+                                lightSheetOtf = lightSheetOtf * A_sigma^2 * exp(-1 * 2 * sigma_exp / (NA / NA_pupil)) / A_0^2;
+                            end    
 % % % % % % %                 lightSheetOtf = lightSheetOtf ./ max(abs(lightSheetOtf(:))); % Maintain the mean brightness
                 
 % % % % % %                 % TOTFC

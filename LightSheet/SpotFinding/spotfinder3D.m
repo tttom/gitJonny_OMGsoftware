@@ -1,7 +1,7 @@
 function [data_structure,outmat] = spotfinder3D(inmatrix,threshold,yRange,xRange,zRange,ySearchLimits)
 %inmatrix is a recorded light sheet volume
 
-%threshold (user input in line 26) is the minimum pixel intensity the algorithm should look for.
+%threshold is the minimum pixel intensity the algorithm should look for.
 %threshold should be high enough that it is only found in bead PSFs, not
 %the background.
 
