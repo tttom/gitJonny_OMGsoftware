@@ -70,6 +70,12 @@ function [cartesianPupilFunction,cartesianPupilFunction_amplitude,cartesianPupil
     % A = (abs(zRange) <= z_max); % flat intensity profile for |z| <= z_max
 %     sigma = 2;
     A = exp(sigma .* zRange / (z_max)) .* (abs(zRange) <= z_max); % expential increase for |z| <= z_max
+%     A = exp(0.5 .* zRange / (z_max)) .* ((zRange >= -1 * z_max) & (zRange < -1 * z_max *1 / 3))...
+%         + 0.4 .* ((zRange >= -1 * z_max * 1 / 3) & (zRange < z_max *1 / 3))...
+%         + exp(- 0.5 .* zRange / (z_max)) .* ((zRange >= z_max * 1 / 3) & (zRange <= z_max));
+%     A = 1 / 3 .* ((zRange >= -1 * z_max) & (zRange < -1 * z_max *1 / 3))...
+%         + 2 / 3 .* ((zRange >= -1 * z_max * 1 / 3) & (zRange < z_max *1 / 3))...
+%         + 1 .* ((zRange >= z_max * 1 / 3) & (zRange <= z_max));
 
     S = zeros(size(k_zRange));
     U = zeros(size(zRange));
@@ -113,34 +119,33 @@ function [cartesianPupilFunction,cartesianPupilFunction_amplitude,cartesianPupil
 %         end
     end
 
-%     figure;
-%     subplot(5,1,1);plot(zRange / z_max,abs(A).^2);
-%     title('|A|^2');
-%     xlabel('z / z_m_a_x');
-%     ylabel('Intensity [a.u.]');
-%     xlim([-2 2]);
-%     subplot(5,1,2);plot(k_r / (2 * NA / lambda),real(S));
-%     title('|S|');
-%     ylabel('Amplitude [a.u.]');
-%     xlabel('k_r [0:1]');
-%     xlim([0 1.4]);
-%     subplot(5,1,3);plot(zRange / z_max,abs(U).^2);
-%     title('|U|^2');
-%     xlabel('z / z_m_a_x');
-%     ylabel('Intensity [a.u.]');
-%     xlim([-2 2]);
-%     subplot(5,1,4);plot(k_r / (2 * NA / lambda),real(S_Filtered),k_r / (2 * NA / lambda),real(pupilFilterStandard));
-%     title('|S|');
-%     xlim([0 1.4]);
-%     xlabel('k_r [0:1]');
-%     ylabel('Amplitude [a.u.]');
-%     subplot(5,1,5);plot(zRange / z_max,abs(U_Filtered).^2);
-%     title('|U|^2');
-%     xlabel('z / z_m_a_x');
-%     ylabel('Intensity [a.u.]');
-%     xlim([-2 2]);
-%     drawnow; shg;
-
+    figure;
+    subplot(5,1,1);plot(zRange / z_max,abs(A).^2);
+    title('|A|^2');
+    xlabel('z / z_m_a_x');
+    ylabel('Intensity [a.u.]');
+    xlim([-2 2]);
+    subplot(5,1,2);plot(k_r / (2 * NA / lambda),real(S));
+    title('|S|');
+    ylabel('Amplitude [a.u.]');
+    xlabel('k_r [0:1]');
+    xlim([0 1.4]);
+    subplot(5,1,3);plot(zRange / z_max,abs(U).^2);
+    title('|U|^2');
+    xlabel('z / z_m_a_x');
+    ylabel('Intensity [a.u.]');
+    xlim([-2 2]);
+    subplot(5,1,4);plot(k_r / (2 * NA / lambda),real(S_Filtered),k_r / (2 * NA / lambda),real(pupilFilterStandard));
+    title('|S|');
+    xlim([0 1.4]);
+    xlabel('k_r [0:1]');
+    ylabel('Amplitude [a.u.]');
+    subplot(5,1,5);plot(zRange / z_max,abs(U_Filtered).^2);
+    title('|U|^2');
+    xlabel('z / z_m_a_x');
+    ylabel('Intensity [a.u.]');
+    xlim([-2 2]);
+    drawnow; shg;
 
     % convert to a 2d pupil function array
     radial_Coord = k_r / (2 * NA / lambda);

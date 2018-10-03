@@ -1,0 +1,4 @@
+2017-10-10 14:11:27.716| Limiting pupil sampling grid size to (1024,1024) while (2661,2661) would be required in principle. This can cause aliasing artefacts.
+2017-10-10 15:18:57.125| Limiting pupil sampling grid size to (1024,1024) while (1459,1459) would be required in principle. This can cause aliasing artefacts.
+2017-10-10 15:19:18.563| Limiting pupil sampling grid size to (1024,1024) while (1220,1220) would be required in principle. This can cause aliasing artefacts.
+2017-10-10 15:22:47.723| Limiting pupil sampling grid size to (1024,1024) while (1220,1220) would be required in principle. This can cause aliasing artefacts.

@@ -81,7 +81,8 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
 %         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\abs55cm-1'};
 %         folderNames = {'F:\NEW_SYSTEM_RESULTS\2017-01-25_AttnComp\test_focalTilt'};
 %         folderNames = {'H:\NEW_SYSTEM_RESULTS\2017-04-06_Dicty'};
-        folderNames = {'H:\NEW_SYSTEM_RESULTS\2017-04-14_Opercula\2Opercula'};
+%         folderNames = {'H:\NEW_SYSTEM_RESULTS\2017-04-14_Opercula\2Opercula'};
+        folderNames={'H:\Stored Files\2017-12-20_RealignmentTest\BeadStacks_600nmRedFluorescent\2017-12-20 16_28_18.338'};
 
     end
     if (nargin<2) 
@@ -104,7 +105,8 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
     end
     if (nargin<6)
         %perspectiveScaling: two-element vector in m^-1, components ordered vertical horizontal
-        perspectiveScaling=[0.5 1.2]*1e-3;
+        perspectiveScaling=[0.3609 0.7050]*1e-3; %2017/12/20
+%         perspectiveScaling=[0.5 1.2]*1e-3;
 %         perspectiveScaling=[0.3822 -0.4994]*1e-3; %first calc for attn
 %         comp
 %         perspectiveScaling=[0.5796 0.7339]*1e-3;
@@ -113,7 +115,8 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
     if (nargin<5)
         %scanShear also a two-element vector in m^-1 ([vertical
         %horizontal])
-        scanShear=[0.0002 0.0302];
+        scanShear=[0.0213 -0.0452]; %2017/12/20
+%         scanShear=[0.0002 0.0302];
 %         scanShear=[-0.0004 0.0208];
 %         scanShear=[-0.0594,-0.0044];
     end
@@ -231,7 +234,8 @@ function processWaterImmersionLightSheetVideos_OfflineCodeOnly(folderNames,repro
                     logMessage('Loading %s...',inputFileName);
                     try
                         recordedImageStack=readDataCubeFromAviFile(inputFileName);
-                        recordedImageStack = flip(recordedImageStack,2);
+                        %recordedImageStack = flip(recordedImageStack,2); %use on lab PC
+                        recordedImageStack = flipdim(recordedImageStack,2); %use on laptop
                     catch Exc
                         logMessage('Failed to load data stack from %s!',inputFileName);
                         recordedImageStack=[];

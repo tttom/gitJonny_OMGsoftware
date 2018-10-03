@@ -1,5 +1,5 @@
 
-function [beam_CrossSection,lightSheet_CrossSection,transverse_Range,longitudinal_Range] = besselPsfSimulation_ZYang(cartesianPupilFunction,z)
+function [beam_CrossSection,lightSheet_CrossSection,transverse_Range,longitudinal_Range,fullPsf] = besselPsfSimulation_ZYang(cartesianPupilFunction,z)
 
 % define the optical system
 lambda = 0.532e-6;
@@ -16,15 +16,39 @@ n_sample = 1.33;         % refractive index of sample medium
 % z = [-100:5:100] * 1e-6;	%propagation
 
 if nargin < 1
-    S = load('NormalBessel_501x501px.mat','cartesianPupilFunction');
+    
+%     S = load('NormalBessel_501x501px.mat','cartesianPupilFunction');
+%     S = load('Compensated_Bessel(0.25)_501x501px.mat','cartesianPupilFunction');
+    S = load('FlatTopBessel_501x501px.mat','cartesianPupilFunction');
+
+
     cartesianPupilFunction = S.cartesianPupilFunction;
     clear S;
+    
+%     [X,Y] = meshgrid(-250:1:250,-250:1:250);
+%     spiral = atan2(Y,X);
+%     delta = pi/126;
+%     pieSlice = ((abs(spiral) >= (pi/6 - delta)) & (abs(spiral) <= (pi/6 + delta)))...;
+% + ((abs(spiral) >= (pi/2 - delta)) & (abs(spiral) <= (pi/2 + delta)))...
+% +((abs(spiral) >= (5*pi/6 - delta)) & (abs(spiral) <= (5*pi/6 + delta)));
+% 
+%     cartesianPupilFunction = cartesianPupilFunction .* pieSlice;
+    
 end
 
 if nargin < 2
-   z = [-100:5:100] * 1e-6; % propagation [metres] 
+   z = [-100:1:100] * 1e-6; % propagation [metres] 
+%    z = [-5:5:5] * 1e-6; % propagation [metres] 
+%     z = [-40:20:40] * 1e-6; % propagation [metres] 
 end
     
+
+Flag_2D_Simulation = 1;
+
+if ~Flag_2D_Simulation
+    fullPsf = 0;
+end
+
 %     w0 = nn/2*1e-3;
 % %     
 % %     % ============= calculate the parameter of ring at back apeture [NOT REQURIED] ===========
@@ -167,6 +191,10 @@ end
     Psf = zeros(size(z,2),size(r2,2));
     integratedPsf = zeros(size(Psf));
     
+    if Flag_2D_Simulation
+        fullPsf = zeros(size(r2,1),size(r2,1),size(z,2));
+    end
+    
     for n=1:length(z)
 %         n
         H = exp(-1i * pi * lambda / n_sample * z(n) * r2.^2);     % transfer function
@@ -176,6 +204,9 @@ end
         centreLine = u2(maxIdx,:);               % Centre line of the field
         Psf(n,:) = abs(centreLine).^2;        % Intensity of the centre Line to PSF
         integratedPsf(n,:) = sum(abs(u2).^2,1);
+        if Flag_2D_Simulation
+            fullPsf(:,:,n) = abs(u2).^2;
+        end
         G2 = U2;
     end
 

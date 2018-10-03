@@ -10,7 +10,7 @@
 		"power": 1e-05
 	},
 	"detection": {
-		"calibratedSystemMagnification": 36.74,
+		"calibratedSystemMagnification": 36.58,
 		"wavelength": 6e-07,
 		"objective": {
 			"refractiveIndex": 1.33,
@@ -26,7 +26,7 @@
 			"quantumYield": 0.79
 		},
 		"refractiveIndex": 1.33,
-		"signalLevel": 0.05,
+		"signalLevel": 0.02,
 		"backgroundLevel": 0.01
 	},
 	"detector": {

@@ -3,6 +3,10 @@
 *.mat
 *.fig
 *.png
+*.tif
+*.jpg
+*.bmp
+*.gif
 *.asv
 *.avi
 *.svg

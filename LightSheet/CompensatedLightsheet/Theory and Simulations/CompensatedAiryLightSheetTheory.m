@@ -6,17 +6,18 @@
 %%%                 light-sheet.
 %%%
 %%% updates (latest first):
-%%%                 
+%%%                 11/01/2018:
+%%%                 Corrected equations converting alpha and x0 and sigma and b0.    
 %%%
 %%%
 %%% END %%%
 
 
 % "real-space" Airy parameter [metres]
-x0 = @(lambda,NA,alpha) nthroot(6 * pi .* alpha,3) .* lambda / 2 ./ NA;
+x0 = @(lambda,NA,alpha) nthroot(6 * pi .* alpha,3) .* lambda / 2 / pi ./ NA;
 
 % "real-space" compensation parameter [metres]
-b0 = @(lambda,NA,sigma) sigma .* lambda / 2 ./ NA;
+b0 = @(lambda,NA,sigma) sigma .* lambda / 2 / pi ./ NA;
 
 % compensation (using "real-space" variables) for checking Kai_sigma_alpha
 % [m^-1]
@@ -26,12 +27,12 @@ Kai_b0_x0_conversion = @(lambda,NA,n,sigma,alpha) b0(lambda,NA,sigma) .* lambda 
 Kai_b0_x0 = @(lambda,n,b0,x0) b0 .* lambda / 2 / pi / n ./ (x0.^3);
 
 % compensation (using normalised variables) [m^-1]
-Kai_sigma_alpha = @(lambda,NA,n,sigma,alpha) sigma .* (NA.^2) / 3 / (pi^2) ./ n ./ alpha ./ lambda;
+Kai_sigma_alpha = @(lambda,NA,n,sigma,alpha) sigma .* (NA.^2) / 3 ./ n ./ alpha ./ lambda;
 
 
-% include "fudge-factor" of 10 to make theory consistent with simulation
-Kai_b0_x0 = @(lambda,n,b0,x0) Kai_b0_x0(lambda,n,b0,x0) * 10; % [m^-1]
-Kai_sigma_alpha = @(lambda,NA,n,sigma,alpha) Kai_sigma_alpha(lambda,NA,n,sigma,alpha) * 10; % [m^-1]
+% % include "fudge-factor" of 10 to make theory consistent with simulation
+% Kai_b0_x0 = @(lambda,n,b0,x0) Kai_b0_x0(lambda,n,b0,x0) * 10; % [m^-1]
+% Kai_sigma_alpha = @(lambda,NA,n,sigma,alpha) Kai_sigma_alpha(lambda,NA,n,sigma,alpha) * 10; % [m^-1]
 
 
 % scale to cm^-1
@@ -85,9 +86,9 @@ colormap cool;
 xlabel('alpha');ylabel('sigma');
 title('Compensation with normalised parameters (alpha, sigma; NA=0.42, n=1.33, lambda=532nm) [cm^-^1]');
 
-[x0,b0] = meshgrid([1.5:0.001:4.5]*1e-6,[0:0.002:4]*1e-7);
+[x0,b0] = meshgrid([0.5:0.001:1.5]*1e-6,[0:0.0002:0.14]*1e-6);
 
-maximum_b0_limit = (b0 .* (x0.^(3 * 0.0635)) <= 0.6125 * (6 * pi).^0.0635 * (lambda / 2 / NA)^(3 * 0.0635 + 1));
+maximum_b0_limit = (b0 .* (x0.^(3 * 0.0635)) <= 0.6125 * (6 * pi).^0.0635 * (lambda / 2 / pi / NA)^(3 * 0.0635 + 1));
 
 Kai_b0_x0_withLimits = Kai_b0_x0(lambda,n,b0,x0) .* maximum_b0_limit;
 Kai_b0_x0_withLimits(Kai_b0_x0_withLimits == 0) = NaN;
@@ -156,9 +157,9 @@ colormap cool;
 xlabel('alpha');ylabel('sigma');
 title('Compensation with normalised parameters (alpha, sigma; NA=0.42, n=1.33, lambda=488nm) [cm^-^1]');
 
-[x0,b0] = meshgrid([1.5:0.001:4.5]*1e-6,[0:0.002:4]*1e-7);
+[x0,b0] = meshgrid([0.5:0.001:1.5]*1e-6,[0:0.0002:0.14]*1e-6);
 
-maximum_b0_limit = (b0 .* (x0.^(3 * 0.0635)) <= 0.6125 * (6 * pi).^0.0635 * (lambda / 2 / NA)^(3 * 0.0635 + 1));
+maximum_b0_limit = (b0 .* (x0.^(3 * 0.0635)) <= 0.6125 * (6 * pi).^0.0635 * (lambda / 2 / pi / NA).^(3 * 0.0635 + 1));
 
 Kai_b0_x0_withLimits = Kai_b0_x0(lambda,n,b0,x0) .* maximum_b0_limit;
 Kai_b0_x0_withLimits(Kai_b0_x0_withLimits == 0) = NaN;

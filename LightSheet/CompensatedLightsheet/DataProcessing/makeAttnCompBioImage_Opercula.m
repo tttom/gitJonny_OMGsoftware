@@ -2,75 +2,8 @@ function makeAttnCompBioFigures_Opercula
 
     color_map = 'gray';
     
-%         % scan 13
-%         folderName = 'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2017-04-14_Opercula\2Opercula\Scan_13\2017-04-14 16_32_05.751';
-% 
-%         fig_handle = figure;
-%         subplot_vert_total = 3;
-%         subplot_horiz_total = 4;
-%         
-%         projDim = 3;
-%         
-%             %big plots
-%             xRange_Start = -40;
-%             xRange_End = 40;
-%             yRange_Start = -100;
-%             yRange_End = 150;
-%             zRange_Start = -20;
-%             zRange_End = 20;
-% 
-%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat');
-% 
-%             subplot_position = [1 2];
-% 
-%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim ...
-%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
-% 
-%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_ASG0.71_kSG1.41_sigmaSG8.00.mat');
-% 
-%             subplot_position = [5 6];
-% 
-%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
-%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
-% 
-%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_sigmaU0.00_sigmaV0.66_ASG1.31_kSG1.41_sigmaSG8.00.mat');
-% 
-%             subplot_position = [9 10];
-% 
-%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
-%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
-%         
-%             %small plots
-%             xRange_Start = -5;
-%             xRange_End = 20;
-%             yRange_Start = 78;
-%             yRange_End = 104;
-%             zRange_Start = -20;
-%             zRange_End = 20;
-% 
-%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat');
-% 
-%             subplot_position = 3;
-% 
-%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
-%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
-% 
-%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_ASG0.71_kSG1.41_sigmaSG8.00.mat');
-% 
-%             subplot_position = 7;
-% 
-%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
-%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
-% 
-%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_sigmaU0.00_sigmaV0.66_ASG1.31_kSG1.41_sigmaSG8.00.mat');
-% 
-%             subplot_position = 11;
-% 
-%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
-%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
-
-    % scan 13
-        folderName = 'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2017-04-14_Opercula\2Opercula\Scan_06\2017-04-14 15_51_53.940';
+        % scan 13
+        folderName = 'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2017-04-14_Opercula\2Opercula\Scan_13\2017-04-14 16_32_05.751';
 
         fig_handle = figure;
         subplot_vert_total = 3;
@@ -79,11 +12,11 @@ function makeAttnCompBioFigures_Opercula
         projDim = 3;
         
             %big plots
-            xRange_Start = -30;
-            xRange_End = 30;
-            yRange_Start = -125;
-            yRange_End = 100;
-            zRange_Start = -95;
+            xRange_Start = -40;
+            xRange_End = 40;
+            yRange_Start = -100;
+            yRange_End = 150;
+            zRange_Start = -20;
             zRange_End = 20;
 
             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat');
@@ -93,7 +26,7 @@ function makeAttnCompBioFigures_Opercula
             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim ...
                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
 
-            fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_sigmaU0.00_sigmaV0.33_ASG0.77_kSG1.41_sigmaSG8.00.mat');
+            fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_ASG0.71_kSG1.41_sigmaSG8.00.mat');
 
             subplot_position = [5 6];
 
@@ -108,11 +41,11 @@ function makeAttnCompBioFigures_Opercula
                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
         
             %small plots
-            xRange_Start = -20;
-            xRange_End = 10;
-            yRange_Start = 65;
-            yRange_End = 90;
-            zRange_Start = -95;
+            xRange_Start = -5;
+            xRange_End = 20;
+            yRange_Start = 78;
+            yRange_End = 104;
+            zRange_Start = -20;
             zRange_End = 20;
 
             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat');
@@ -122,7 +55,7 @@ function makeAttnCompBioFigures_Opercula
             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
 
-            fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_sigmaU0.00_sigmaV0.33_ASG0.77_kSG1.41_sigmaSG8.00.mat');
+            fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_ASG0.71_kSG1.41_sigmaSG8.00.mat');
 
             subplot_position = 7;
 
@@ -135,6 +68,73 @@ function makeAttnCompBioFigures_Opercula
 
             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
+
+%     % scan 06
+%         folderName = 'H:\Stored Files\NEW_LSM_SYSTEM_RESULTS\2017-04-14_Opercula\2Opercula\Scan_06\2017-04-14 15_51_53.940';
+% 
+%         fig_handle = figure;
+%         subplot_vert_total = 3;
+%         subplot_horiz_total = 4;
+%         
+%         projDim = 3;
+%         
+%             %big plots
+%             xRange_Start = -30;
+%             xRange_End = 30;
+%             yRange_Start = -125;
+%             yRange_End = 100;
+%             zRange_Start = -95;
+%             zRange_End = 20;
+% 
+%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat');
+% 
+%             subplot_position = [1 2];
+% 
+%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim ...
+%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
+% 
+%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_sigmaU0.00_sigmaV0.33_ASG0.77_kSG1.41_sigmaSG8.00.mat');
+% 
+%             subplot_position = [5 6];
+% 
+%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
+%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
+% 
+%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_sigmaU0.00_sigmaV0.66_ASG1.31_kSG1.41_sigmaSG8.00.mat');
+% 
+%             subplot_position = [9 10];
+% 
+%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
+%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
+%         
+%             %small plots
+%             xRange_Start = -20;
+%             xRange_End = 10;
+%             yRange_Start = 65;
+%             yRange_End = 90;
+%             zRange_Start = -95;
+%             zRange_End = 20;
+% 
+%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_ASG0.48_kSG1.41_sigmaSG8.00.mat');
+% 
+%             subplot_position = 3;
+% 
+%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
+%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
+% 
+%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_sigmaU0.00_sigmaV0.33_ASG0.77_kSG1.41_sigmaSG8.00.mat');
+% 
+%             subplot_position = 7;
+% 
+%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
+%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
+% 
+%             fileName = strcat(folderName,'\recording0_lambda532nm_alpha20_beta100_sigmaU0.00_sigmaV0.66_ASG1.31_kSG1.41_sigmaSG8.00.mat');
+% 
+%             subplot_position = 11;
+% 
+%             makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRange_End,zRange_Start,zRange_End,projDim...
+%                 ,fig_handle,subplot_vert_total,subplot_horiz_total,subplot_position,color_map);
 
 end
 
@@ -164,7 +164,7 @@ function makeAttnCompBioImage(fileName,xRange_Start,xRange_End,yRange_Start,yRan
         proj = squeeze(max(...
             restoredDataCube(xRange_start:xRange_end,yRange_start:yRange_end,zRange_start:zRange_end),[],projDim)).';
     end
-    proj = proj / max(proj(:));
+%     proj = proj / max(proj(:));
     
     clear restoredDataCube
     
